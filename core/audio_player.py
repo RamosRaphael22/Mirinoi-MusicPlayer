@@ -7,7 +7,10 @@ class AudioPlayer:
         self.ffplay_process = None
         self.current_url = None
         self.is_playing = False
-        self._lock = threading.RLock() 
+        self._lock = threading.RLock()
+
+        # 🔹 callback quando a música termina
+        self.on_finished = None
 
     # 🔹 Tocar música
     def play(self, video_url: str):
@@ -41,15 +44,22 @@ class AudioPlayer:
                 )
                 self.is_playing = True
 
+            # 🔹 espera término natural
             self.ffplay_process.wait()
 
+            finished_naturally = True
+
         except Exception:
-            pass
+            finished_naturally = False
 
         finally:
             with self._lock:
                 self.is_playing = False
                 self.ffplay_process = None
+
+            # 🔹 dispara callback apenas se terminou normalmente
+            if finished_naturally and self.on_finished:
+                self.on_finished()
 
     # 🔹 Gera URL direta do áudio
     def _get_audio_stream_url(self, video_url: str) -> str:

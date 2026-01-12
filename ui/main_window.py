@@ -29,10 +29,15 @@ class MainWindow(ctk.CTk):
         self.audio_player = AudioPlayer()
         self.queue_manager = QueueManager()
 
-        # 🔹 UI (depois dos serviços)
+        # 🔹 Callback de autoplay
+        self.audio_player.on_finished = self._on_track_finished
+
+        # 🔹 UI
         self._build_layout()
 
+    # ───────────────────────────────
     # 🔹 Layout
+    # ───────────────────────────────
     def _build_layout(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -63,13 +68,12 @@ class MainWindow(ctk.CTk):
         )
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
 
-    # 🔹 Playlist selecionada
+    #playlist selection
     def _on_playlist_selected(self, playlist):
-        """Agora acessa atributos do objeto Playlist"""
         self.track_list.load_tracks([])
         threading.Thread(
             target=self._load_tracks_thread,
-            args=(playlist.url,),  # ✅ atributo do objeto
+            args=(playlist.url,),
             daemon=True
         ).start()
 
@@ -78,17 +82,16 @@ class MainWindow(ctk.CTk):
         self.after(0, lambda: self._update_tracks(tracks))
 
     def _update_tracks(self, tracks):
-        # 🔹 tracks agora são objetos Track
         self.track_list.load_tracks(tracks)
         self.queue_manager.set_queue(tracks)
 
-    # 🔹 Música selecionada
+    #track selection
     def _on_track_selected(self, track):
         index = self.track_list.selected_index
         self.queue_manager.current_index = index
         self._play_current()
 
-    # 🔹 Player actions
+    # player controls
     def _play_current(self):
         track = self.queue_manager.current()
         if track:
@@ -107,14 +110,19 @@ class MainWindow(ctk.CTk):
         if track:
             self.audio_player.play(track.url)
 
-    # 🔹 Shuffle
+    #auto play callback
+    def _on_track_finished(self):
+        # Executa com segurança no thread do Tkinter
+        self.after(0, self._play_next)
+
+    # suffle
     def _toggle_shuffle(self):
         self.shuffle_enabled = not self.shuffle_enabled
+
         if self.shuffle_enabled:
             self.queue_manager.shuffle()
         else:
             self.queue_manager.unshuffle()
 
-        # 🔹 Atualiza lista e botão
         self.track_list.load_tracks(self.queue_manager.queue)
         self.controls.set_shuffle_active(self.shuffle_enabled)
