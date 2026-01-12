@@ -1,6 +1,5 @@
 import subprocess
 import threading
-import time
 
 
 class AudioPlayer:
@@ -8,42 +7,49 @@ class AudioPlayer:
         self.ffplay_process = None
         self.current_url = None
         self.is_playing = False
+        self._lock = threading.RLock() 
 
     # 🔹 Tocar música
     def play(self, video_url: str):
-        self.stop()
-        self.current_url = video_url
+        with self._lock:
+            self.stop()
+            self.current_url = video_url
 
-        threading.Thread(
-            target=self._play_thread,
-            daemon=True
-        ).start()
+            threading.Thread(
+                target=self._play_thread,
+                daemon=True
+            ).start()
 
     # 🔹 Thread de execução
     def _play_thread(self):
         try:
             audio_url = self._get_audio_stream_url(self.current_url)
 
-            self.ffplay_process = subprocess.Popen(
-                [
-                    "ffplay",
-                    "-nodisp",
-                    "-autoexit",
-                    "-loglevel",
-                    "quiet",
-                    audio_url
-                ],
-                stdin=subprocess.PIPE,
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
-            )
+            with self._lock:
+                self.ffplay_process = subprocess.Popen(
+                    [
+                        "ffplay",
+                        "-nodisp",
+                        "-autoexit",
+                        "-loglevel",
+                        "quiet",
+                        audio_url
+                    ],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL
+                )
+                self.is_playing = True
 
-            self.is_playing = True
             self.ffplay_process.wait()
 
+        except Exception:
+            pass
+
         finally:
-            self.is_playing = False
-            self.ffplay_process = None
+            with self._lock:
+                self.is_playing = False
+                self.ffplay_process = None
 
     # 🔹 Gera URL direta do áudio
     def _get_audio_stream_url(self, video_url: str) -> str:
@@ -63,10 +69,11 @@ class AudioPlayer:
 
     # 🔹 Para a reprodução
     def stop(self):
-        if self.ffplay_process:
-            self.ffplay_process.kill()
-            self.ffplay_process = None
-            self.is_playing = False
+        with self._lock:
+            if self.ffplay_process:
+                self.ffplay_process.kill()
+                self.ffplay_process = None
+                self.is_playing = False
 
     # 🔹 Pause (simulado)
     def pause(self):

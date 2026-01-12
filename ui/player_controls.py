@@ -19,7 +19,8 @@ class PlayerControls(ctk.CTkFrame):
         self.on_prev = on_prev
         self.on_shuffle = on_shuffle
 
-        self.shuffle_active = False  # 🔹 estado interno do shuffle
+        # 🔹 guarda cor padrão do botão
+        self._default_shuffle_color = "#1F6AA5"
 
         self._build_ui()
 
@@ -30,11 +31,11 @@ class PlayerControls(ctk.CTkFrame):
         self.prev_btn = ctk.CTkButton(self, text="⏮", command=self.on_prev)
         self.next_btn = ctk.CTkButton(self, text="⏭", command=self.on_next)
 
-        # 🔹 botão shuffle agora chama método interno que alterna cor
         self.shuffle_btn = ctk.CTkButton(
             self,
             text="🔀",
-            command=self._shuffle_clicked
+            command=self.on_shuffle,
+            fg_color=self._default_shuffle_color  # 🔹 DEFINE A COR INICIAL
         )
 
         self.prev_btn.pack(side="left", padx=5)
@@ -43,21 +44,8 @@ class PlayerControls(ctk.CTkFrame):
         self.next_btn.pack(side="left", padx=5)
         self.shuffle_btn.pack(side="left", padx=5)
 
-    # 🔹 clique interno do shuffle
-    def _shuffle_clicked(self):
-        if self.on_shuffle:
-            self.on_shuffle()
-        # 🔹 alterna o estado interno e atualiza a cor
-        self.shuffle_active = not self.shuffle_active
-        self._update_shuffle_color()
-
-    # 🔹 atualiza a cor do shuffle
     def set_shuffle_active(self, active: bool):
-        self.shuffle_active = active
-        self._update_shuffle_color()
-
-    def _update_shuffle_color(self):
-        if self.shuffle_active:
-            self.shuffle_btn.configure(fg_color="#2ecc71")  # verde
+        if active:
+            self.shuffle_btn.configure(fg_color="#2ecc71")
         else:
-            self.shuffle_btn.configure(fg_color="#1F6AA5")  # azul padrão
+            self.shuffle_btn.configure(fg_color=self._default_shuffle_color)
