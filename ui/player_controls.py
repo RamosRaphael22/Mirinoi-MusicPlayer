@@ -32,9 +32,7 @@ class PlayerControls(ctk.CTkFrame):
         self.shuffle_btn = ctk.CTkButton(
             self,
             text="🔀",
-            command=self.on_shuffle,
-            width=40,
-            fg_color="transparent")
+            command=self.on_shuffle)
 
         self.prev_btn.pack(side="left", padx=5)
         self.play_btn.pack(side="left", padx=5)
@@ -46,7 +44,7 @@ class PlayerControls(ctk.CTkFrame):
         if active:
             self.shuffle_btn.configure(fg_color="#2ecc71")
         else:
-            self.shuffle_btn.configure(fg_color="transparent")
+            self.shuffle_btn.configure(fg_color="#1F6AA5")
 
 
 
