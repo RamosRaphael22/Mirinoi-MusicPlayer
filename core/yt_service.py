@@ -1,6 +1,7 @@
 import subprocess
 import json
 from typing import List, Dict
+from models.track import Track
 
 
 class YouTubeService:
@@ -8,7 +9,7 @@ class YouTubeService:
         self.ytdlp_cmd = "yt-dlp"
 
     # 🔹 Retorna músicas de uma playlist
-    def get_tracks_from_playlist(self, playlist_url: str) -> List[Dict]:
+    def get_tracks_from_playlist(self, playlist_url: str) -> List[Track]:
         command = [
             self.ytdlp_cmd,
             "--flat-playlist",
@@ -30,14 +31,14 @@ class YouTubeService:
             for line in process.stdout:
                 try:
                     data = json.loads(line)
-                    track = {
-                        "title": data.get("title"),
-                        "id": data.get("id"),
-                        "url": f"https://music.youtube.com/watch?v={data.get('id')}"
-                    }
+                    if not data.get("title") or not data.get("id"):
+                        continue
 
-                    if track["title"] and track["id"]:
-                        tracks.append(track)
+                    track = Track(
+                        title=data.get("title"),
+                        url=f"https://music.youtube.com/watch?v={data.get('id')}"
+                    )
+                    tracks.append(track)
 
                 except json.JSONDecodeError:
                     continue
@@ -49,7 +50,7 @@ class YouTubeService:
             raise RuntimeError("yt-dlp não encontrado no PATH")
 
     # 🔹 Busca simples (opcional para depois)
-    def search_first(self, query: str) -> Dict | None:
+    def search_first(self, query: str) -> Track | None:
         command = [
             self.ytdlp_cmd,
             "--dump-json",
@@ -65,10 +66,13 @@ class YouTubeService:
             )
 
             data = json.loads(output)
-            return {
-                "title": data.get("title"),
-                "url": f"https://music.youtube.com/watch?v={data.get('id')}"
-            }
+            if not data.get("title") or not data.get("id"):
+                return None
+
+            return Track(
+                title=data.get("title"),
+                url=f"https://music.youtube.com/watch?v={data.get('id')}"
+            )
 
         except Exception:
             return None

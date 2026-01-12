@@ -1,6 +1,6 @@
 import customtkinter as ctk
 from tkinter import messagebox
-
+from ui.playlist_modal import PlaylistModal  # import do modal
 
 class PlaylistSidebar(ctk.CTkFrame):
     def __init__(self, parent, csv_service, on_select_callback=None):
@@ -52,48 +52,37 @@ class PlaylistSidebar(ctk.CTkFrame):
         playlists = self.csv_service.load_playlists()
 
         for playlist in playlists:
+            # 🔹 agora playlist é um objeto Playlist, usamos atributos
             btn = ctk.CTkButton(
                 self.scroll,
-                text=playlist["name"],
+                text=playlist.name,
                 anchor="w",
                 command=lambda p=playlist: self._select_playlist(p)
             )
             btn.pack(fill="x", pady=2, padx=5)
 
-            self.playlist_buttons[playlist["id"]] = btn
+            self.playlist_buttons[playlist.id] = btn
 
     # 🔹 Seleção de playlist
     def _select_playlist(self, playlist):
-        self.selected_playlist_id = playlist["id"]
+        self.selected_playlist_id = playlist.id
 
         for pid, btn in self.playlist_buttons.items():
-            btn.configure(fg_color="#1f6aa5" if pid == playlist["id"] else None)
+            btn.configure(fg_color="#08025C" if pid == playlist.id else "#1f6aa5")
+
 
         if self.on_select_callback:
             self.on_select_callback(playlist)
 
-    # 🔹 Dialog para adicionar playlist
+    # 🔹 Dialog para adicionar playlist usando modal
     def _add_playlist_dialog(self):
-        dialog = ctk.CTkInputDialog(
-            title="Nova Playlist",
-            text="Nome da playlist:"
-        )
-        name = dialog.get_input()
+        modal = PlaylistModal(self)
+        result = modal.show()  # retorna (name, url) ou None
 
-        if not name:
-            return
-
-        dialog = ctk.CTkInputDialog(
-            title="Nova Playlist",
-            text="URL da playlist:"
-        )
-        url = dialog.get_input()
-
-        if not url:
-            return
-
-        self.csv_service.add_playlist(name, url)
-        self._load_playlists()
+        if result:
+            name, url = result
+            self.csv_service.add_playlist(name, url)
+            self._load_playlists()
 
     # 🔹 Remove playlist selecionada
     def _remove_selected_playlist(self):

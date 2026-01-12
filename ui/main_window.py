@@ -13,7 +13,6 @@ from ui.player_controls import PlayerControls
 
 
 class MainWindow(ctk.CTk):
-
     def __init__(self):
         super().__init__()
 
@@ -32,7 +31,6 @@ class MainWindow(ctk.CTk):
 
         # 🔹 UI (depois dos serviços)
         self._build_layout()
-
 
     # 🔹 Layout
     def _build_layout(self):
@@ -58,30 +56,29 @@ class MainWindow(ctk.CTk):
         self.controls = PlayerControls(
             self,
             on_play=self._play_current,
-            on_pause=self.audio_player.pause,
+            on_pause=self._pause,
             on_next=self._play_next,
             on_prev=self._play_prev,
             on_shuffle=self._toggle_shuffle
-
         )
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
 
     # 🔹 Playlist selecionada
     def _on_playlist_selected(self, playlist):
+        """Agora acessa atributos do objeto Playlist"""
         self.track_list.load_tracks([])
-
         threading.Thread(
             target=self._load_tracks_thread,
-            args=(playlist["url"],),
+            args=(playlist.url,),  # ✅ atributo do objeto
             daemon=True
         ).start()
 
     def _load_tracks_thread(self, url):
         tracks = self.yt_service.get_tracks_from_playlist(url)
-
         self.after(0, lambda: self._update_tracks(tracks))
 
     def _update_tracks(self, tracks):
+        # 🔹 tracks agora são objetos Track
         self.track_list.load_tracks(tracks)
         self.queue_manager.set_queue(tracks)
 
@@ -95,29 +92,29 @@ class MainWindow(ctk.CTk):
     def _play_current(self):
         track = self.queue_manager.current()
         if track:
-            self.audio_player.play(track["url"])
-    
+            self.audio_player.play(track.url)
+
     def _pause(self):
         self.audio_player.pause()
-
 
     def _play_next(self):
         track = self.queue_manager.next()
         if track:
-            self.audio_player.play(track["url"])
+            self.audio_player.play(track.url)
 
     def _play_prev(self):
         track = self.queue_manager.prev()
         if track:
-            self.audio_player.play(track["url"])
+            self.audio_player.play(track.url)
 
+    # 🔹 Shuffle
     def _toggle_shuffle(self):
         self.shuffle_enabled = not self.shuffle_enabled
-
         if self.shuffle_enabled:
             self.queue_manager.shuffle()
-            self.track_list.load_tracks(self.queue_manager.queue)
+        else:
+            self.queue_manager.unshuffle()
 
-        # 🔹 Atualiza a cor do botão (sempre)
+        # 🔹 Atualiza lista e botão
+        self.track_list.load_tracks(self.queue_manager.queue)
         self.controls.set_shuffle_active(self.shuffle_enabled)
-
