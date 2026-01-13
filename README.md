@@ -9,12 +9,19 @@ Mirinoi é um player de músicas feito **100% em Python**, com interface gráfic
 ## 🚀 Funcionalidades
 
 ✔ Interface gráfica moderna (CustomTkinter)
+
 ✔ Carregamento de playlists do YouTube Music
+
 ✔ Reprodução automática da próxima faixa (autoplay)
+
 ✔ Controle de fila (next / previous)
+
 ✔ Shuffle com preservação da música atual
+
 ✔ Highlight da música em reprodução
+
 ✔ Controle por botões (play, pause, next, prev)
+
 ✔ Arquivo `.csv` para gerenciar playlists
 
 🔜 **Em desenvolvimento**
@@ -129,7 +136,9 @@ Minha Playlist,https://www.youtube.com/playlist?list=XXXX
 ## 👨‍💻 Autor
 
 Projeto desenvolvido por **Raphael**
+
 Curso: Análise e Desenvolvimento de Sistemas
+
 Linguagem principal: Python 🐍
 
 ---
@@ -137,6 +146,7 @@ Linguagem principal: Python 🐍
 ## 🧠 Observação Importante
 
 Este projeto é **educacional** e experimental.
+
 Use playlists públicas e respeite os termos do YouTube.
 
 ---
