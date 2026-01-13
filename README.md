@@ -135,7 +135,7 @@ Minha Playlist,https://www.youtube.com/playlist?list=XXXX
 
 ## 👨‍💻 Autor
 
-Projeto desenvolvido por **Raphael**
+Projeto desenvolvido por **Raphael Ramos Cavalcante**
 
 Curso: Análise e Desenvolvimento de Sistemas
 
