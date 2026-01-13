@@ -1,6 +1,8 @@
 import customtkinter as ctk
 
-
+# Player control buttons: play, pause, next, previous, shuffle
+# Calls provided callbacks on button presses
+# Allows visual indication of shuffle state
 class PlayerControls(ctk.CTkFrame):
     def __init__(
         self,
@@ -19,12 +21,10 @@ class PlayerControls(ctk.CTkFrame):
         self.on_prev = on_prev
         self.on_shuffle = on_shuffle
 
-        # 🔹 guarda cor padrão do botão
         self._default_shuffle_color = "#1F6AA5"
 
         self._build_ui()
 
-    # 🔹 UI
     def _build_ui(self):
         self.play_btn = ctk.CTkButton(self, text="▶", command=self.on_play)
         self.pause_btn = ctk.CTkButton(self, text="⏸", command=self.on_pause)
@@ -35,7 +35,7 @@ class PlayerControls(ctk.CTkFrame):
             self,
             text="🔀",
             command=self.on_shuffle,
-            fg_color=self._default_shuffle_color  # 🔹 DEFINE A COR INICIAL
+            fg_color=self._default_shuffle_color 
         )
 
         self.prev_btn.pack(side="left", padx=5)

@@ -1,14 +1,23 @@
 import random
 
+# Manages the playback queue of tracks
+# Supports setting the queue, navigating tracks, shuffling, and unshuffling
+# Maintains the original order of tracks for unshuffling
+# Provides methods to get the current, next, and previous tracks
+# Allows clearing the queue
+# Uses random.shuffle for shuffling the queue
+# Keeps track of the current index in the queue
+# Allows wrapping around the queue when navigating next/previous
+# Preserves the original queue order for unshuffling
 class QueueManager:
     def __init__(self):
         self.queue = []
-        self.original_queue = []   # 🔹 guarda ordem original
+        self.original_queue = []  
         self.current_index = 0
 
     def set_queue(self, tracks):
         self.queue = tracks.copy()
-        self.original_queue = tracks.copy()  # 🔹 salva ordem original
+        self.original_queue = tracks.copy()  
         self.current_index = 0
 
     def current(self):
@@ -32,7 +41,6 @@ class QueueManager:
         if not self.queue:
             return
 
-        # 🔹 mantém a música atual
         current = self.current()
         random.shuffle(self.queue)
 
@@ -41,7 +49,6 @@ class QueueManager:
         else:
             self.current_index = 0
 
-    # 🔹 Restaura ordem original
     def unshuffle(self):
         if not self.original_queue:
             return

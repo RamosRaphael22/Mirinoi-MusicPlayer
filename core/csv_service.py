@@ -3,6 +3,14 @@ import os
 from typing import List
 from models.playlist import Playlist
 
+# Service to manage playlists stored in a CSV file
+# Ensures CSV integrity, loads, adds, and removes playlists
+# Backs up corrupted files
+# CSV file format: id,name,url
+# Each playlist has a unique integer ID
+# Provides methods to load all playlists, add a new playlist, and remove an existing playlist by ID
+# Backs up the original CSV file if headers are incorrect
+# Creates a new CSV file with correct headers if the original is missing or corrupted
 class CSVService:
     HEADERS = ["id", "name", "url"]
 
@@ -28,7 +36,6 @@ class CSVService:
             writer = csv.writer(file)
             writer.writerow(self.HEADERS)
 
-    # 🔹 Retorna lista de objetos Playlist
     def load_playlists(self) -> List[Playlist]:
         playlists = []
 

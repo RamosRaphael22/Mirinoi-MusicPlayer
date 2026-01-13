@@ -1,6 +1,10 @@
 import customtkinter as ctk
 
-
+# UI component to display and manage the list of tracks
+# Allows track selection and highlights the selected track
+# Calls a callback when a track is selected
+# Provides method to load tracks into the list
+# Allows setting highlight on a specific track
 class TrackList(ctk.CTkFrame):
     def __init__(self, parent, on_track_selected=None):
         super().__init__(parent)
@@ -15,9 +19,6 @@ class TrackList(ctk.CTkFrame):
 
         self._build_ui()
 
-    # ───────────────────────────────
-    # UI
-    # ───────────────────────────────
     def _build_ui(self):
         self.title = ctk.CTkLabel(
             self,
@@ -29,9 +30,6 @@ class TrackList(ctk.CTkFrame):
         self.scroll = ctk.CTkScrollableFrame(self)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=5)
 
-    # ───────────────────────────────
-    # Load tracks
-    # ───────────────────────────────
     def load_tracks(self, tracks):
         self.tracks = tracks
         self.selected_index = None
@@ -56,9 +54,6 @@ class TrackList(ctk.CTkFrame):
             btn.pack(fill="x", pady=2)
             self.track_buttons.append(btn)
 
-    # ───────────────────────────────
-    # Manual selection
-    # ───────────────────────────────
     def _select_track(self, index):
         self.selected_index = index
         self.set_highlight(index)
@@ -66,9 +61,6 @@ class TrackList(ctk.CTkFrame):
         if self.on_track_selected:
             self.on_track_selected(self.tracks[index])
 
-    # ───────────────────────────────
-    # Highlight (manual + autoplay)
-    # ───────────────────────────────
     def set_highlight(self, index):
         self.highlighted_index = index
         self.selected_index = index

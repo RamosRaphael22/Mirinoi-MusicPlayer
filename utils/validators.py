@@ -1,4 +1,4 @@
-# utils/validators.py
+# Utility functions for validating URLs and strings
 import re
 
 def is_youtube_url(url: str) -> bool:
@@ -12,7 +12,6 @@ def is_non_empty_string(value: str) -> bool:
     return isinstance(value, str) and len(value.strip()) > 0
 
 
-# 🔹 Compatibilidade com o resto do sistema
 def is_valid_url(url: str) -> bool:
     """
     Alias para validação de URL.

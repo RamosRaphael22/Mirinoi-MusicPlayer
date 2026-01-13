@@ -10,11 +10,14 @@ from ui.playlist_sidebar import PlaylistSidebar
 from ui.track_list import TrackList
 from ui.player_controls import PlayerControls
 
-
+# Main application window
+# Integrates playlist sidebar, track list, and player controls
+# Manages state of audio player and track queue
+# Handles user interactions for playing, pausing, navigating tracks, and shuffling
+# Uses threading to load tracks without blocking the UI
+# Responds to track completion events to autoplay next track
+# Coordinates between CSV service, YouTube service, audio player, and queue manager
 class MainWindow(ctk.CTk):
-    # ───────────────────────────────
-    # Estados do player
-    # ───────────────────────────────
     STOPPED = "STOPPED"
     PLAYING = "PLAYING"
     PAUSED = "PAUSED"
@@ -22,29 +25,21 @@ class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        # 🔹 Estado
         self.player_state = self.STOPPED
         self.shuffle_enabled = False
 
-        # 🔹 Janela
         self.title("Mirinoi Player")
         self.geometry("900x600")
 
-        # 🔹 Serviços
         self.csv_service = CSVService("playlists.csv")
         self.yt_service = YouTubeService()
         self.audio_player = AudioPlayer()
         self.queue_manager = QueueManager()
 
-        # 🔹 Autoplay
         self.audio_player.on_finished = self._on_track_finished
 
-        # 🔹 UI
         self._build_layout()
 
-    # ───────────────────────────────
-    # Layout
-    # ───────────────────────────────
     def _build_layout(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -72,9 +67,6 @@ class MainWindow(ctk.CTk):
         )
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
 
-    # ───────────────────────────────
-    # Playlist
-    # ───────────────────────────────
     def _on_playlist_selected(self, playlist):
         self._stop_player()
 
@@ -97,18 +89,11 @@ class MainWindow(ctk.CTk):
 
         self.player_state = self.STOPPED
 
-    # ───────────────────────────────
-    # Track selection
-    # ───────────────────────────────
     def _on_track_selected(self, track):
         self.queue_manager.current_index = self.track_list.selected_index
         self._force_play_current()
 
-    # ───────────────────────────────
-    # Player core
-    # ───────────────────────────────
     def _play_current(self):
-        # Play NÃO troca música se já estiver tocando
         if self.player_state == self.PLAYING:
             return
 
@@ -139,9 +124,6 @@ class MainWindow(ctk.CTk):
         self.audio_player.stop()
         self.player_state = self.STOPPED
 
-    # ───────────────────────────────
-    # Navigation
-    # ───────────────────────────────
     def _play_next(self):
         track = self.queue_manager.next()
         if not track:
@@ -156,19 +138,12 @@ class MainWindow(ctk.CTk):
 
         self._force_play_current()
 
-    # ───────────────────────────────
-    # Autoplay
-    # ───────────────────────────────
     def _on_track_finished(self):
-        # Autoplay SOMENTE se estava tocando
         if self.player_state != self.PLAYING:
             return
 
         self.after(0, self._play_next)
 
-    # ───────────────────────────────
-    # Shuffle
-    # ───────────────────────────────
     def _toggle_shuffle(self):
         self.shuffle_enabled = not self.shuffle_enabled
 

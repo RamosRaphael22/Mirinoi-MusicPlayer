@@ -3,12 +3,17 @@ import json
 from typing import List, Dict
 from models.track import Track
 
-
+# Service to interact with YouTube using yt-dlp
+# Fetches tracks from a YouTube playlist URL
+# Searches for the first track matching a query
+# Uses yt-dlp commands to retrieve data in JSON format
+# Parses JSON to create Track objects
+# Handles errors gracefully, returning None or empty lists as needed
+# Provides methods to get tracks from a playlist and search for a track
 class YouTubeService:
     def __init__(self):
         self.ytdlp_cmd = "yt-dlp"
 
-    # 🔹 Retorna músicas de uma playlist
     def get_tracks_from_playlist(self, playlist_url: str) -> List[Track]:
         command = [
             self.ytdlp_cmd,
@@ -49,7 +54,6 @@ class YouTubeService:
         except FileNotFoundError:
             raise RuntimeError("yt-dlp não encontrado no PATH")
 
-    # 🔹 Busca simples (opcional para depois)
     def search_first(self, query: str) -> Track | None:
         command = [
             self.ytdlp_cmd,

@@ -1,4 +1,6 @@
-# models/playlist.py
+# Model representing a playlist with ID, name, and URL
+# Provides methods to convert to/from dict for CSV/JSON storage
+# Each playlist has a unique integer ID, a name, and a URL
 class Playlist:
     def __init__(self, id: int, name: str, url: str):
         self.id = id
@@ -6,7 +8,6 @@ class Playlist:
         self.url = url
 
     def to_dict(self):
-        """Retorna um dict para salvar em CSV ou JSON"""
         return {
             "id": self.id,
             "name": self.name,

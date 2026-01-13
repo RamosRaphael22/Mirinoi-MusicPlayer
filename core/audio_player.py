@@ -2,13 +2,17 @@ import subprocess
 import threading
 from enum import Enum
 
-
+# Audio player status
 class PlayerState(Enum):
     STOPPED = "stopped"
     PLAYING = "playing"
     PAUSED = "paused"
 
-
+# Audio player class
+# Manages audio playback using ffplay and yt-dlp
+# Supports play, pause, and stop functionalities
+# Calls a callback function when playback finishes naturally
+# Usage of threading to handle playback in the background
 class AudioPlayer:
     def __init__(self):
         self.ffplay_process = None
@@ -21,12 +25,9 @@ class AudioPlayer:
 
         self.on_finished = None
 
-    # ───────────────────────────────
-    # Play
-    # ───────────────────────────────
+    # Play audio from a video URL
     def play(self, video_url: str):
         with self._lock:
-            # Já tocando → ignora
             if self.state == PlayerState.PLAYING:
                 return
 
@@ -43,9 +44,7 @@ class AudioPlayer:
                 daemon=True
             ).start()
 
-    # ───────────────────────────────
-    # Thread
-    # ───────────────────────────────
+    # Reproduction thread
     def _play_thread(self, play_id: int):
         try:
             audio_url = self._get_audio_stream_url(self.current_url)
@@ -56,7 +55,7 @@ class AudioPlayer:
 
                 self.ffplay_process = subprocess.Popen(
                     [
-                        "ffplay",
+                       "ffplay",
                         "-nodisp",
                         "-autoexit",
                         "-loglevel",
@@ -82,13 +81,9 @@ class AudioPlayer:
                 self.ffplay_process = None
                 self.state = PlayerState.STOPPED
 
-            # 🔹 Autoplay SOMENTE se terminou naturalmente
             if finished_naturally and self.on_finished:
                 self.on_finished()
 
-    # ───────────────────────────────
-    # Pause
-    # ───────────────────────────────
     def pause(self):
         with self._lock:
             if self.state != PlayerState.PLAYING:
@@ -98,9 +93,6 @@ class AudioPlayer:
             self._terminate_process()
             self.state = PlayerState.PAUSED
 
-    # ───────────────────────────────
-    # Stop (troca de música)
-    # ───────────────────────────────
     def stop(self):
         with self._lock:
             self._stop_requested = True
@@ -108,9 +100,6 @@ class AudioPlayer:
             self._terminate_process()
             self.state = PlayerState.STOPPED
 
-    # ───────────────────────────────
-    # Helpers
-    # ───────────────────────────────
     def _terminate_process(self):
         if self.ffplay_process:
             try:

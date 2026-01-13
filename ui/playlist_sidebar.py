@@ -1,7 +1,12 @@
 import customtkinter as ctk
 from tkinter import messagebox
-from ui.playlist_modal import PlaylistModal  # import do modal
+from ui.playlist_modal import PlaylistModal  
 
+# Sidebar UI component for managing playlists
+# Displays list of playlists from CSV service
+# Allows adding/removing playlists via modal dialog
+# Calls callback on playlist selection
+# Highlights selected playlist
 class PlaylistSidebar(ctk.CTkFrame):
     def __init__(self, parent, csv_service, on_select_callback=None):
         super().__init__(parent, width=220)
@@ -14,7 +19,6 @@ class PlaylistSidebar(ctk.CTkFrame):
         self._build_ui()
         self._load_playlists()
 
-    # 🔹 Construção da UI
     def _build_ui(self):
         self.title = ctk.CTkLabel(
             self,
@@ -42,7 +46,6 @@ class PlaylistSidebar(ctk.CTkFrame):
         )
         self.btn_remove.pack(fill="x", padx=10, pady=(2, 10))
 
-    # 🔹 Carrega playlists do CSV
     def _load_playlists(self):
         for widget in self.scroll.winfo_children():
             widget.destroy()
@@ -52,7 +55,6 @@ class PlaylistSidebar(ctk.CTkFrame):
         playlists = self.csv_service.load_playlists()
 
         for playlist in playlists:
-            # 🔹 agora playlist é um objeto Playlist, usamos atributos
             btn = ctk.CTkButton(
                 self.scroll,
                 text=playlist.name,
@@ -63,7 +65,6 @@ class PlaylistSidebar(ctk.CTkFrame):
 
             self.playlist_buttons[playlist.id] = btn
 
-    # 🔹 Seleção de playlist
     def _select_playlist(self, playlist):
         self.selected_playlist_id = playlist.id
 
@@ -74,17 +75,15 @@ class PlaylistSidebar(ctk.CTkFrame):
         if self.on_select_callback:
             self.on_select_callback(playlist)
 
-    # 🔹 Dialog para adicionar playlist usando modal
     def _add_playlist_dialog(self):
         modal = PlaylistModal(self)
-        result = modal.show()  # retorna (name, url) ou None
+        result = modal.show() 
 
         if result:
             name, url = result
             self.csv_service.add_playlist(name, url)
             self._load_playlists()
 
-    # 🔹 Remove playlist selecionada
     def _remove_selected_playlist(self):
         if not self.selected_playlist_id:
             messagebox.showwarning(
