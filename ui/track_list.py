@@ -1,17 +1,23 @@
 import customtkinter as ctk
 
+
 class TrackList(ctk.CTkFrame):
     def __init__(self, parent, on_track_selected=None):
         super().__init__(parent)
+
         self.on_track_selected = on_track_selected
 
-        self.tracks = []          # 🔹 lista de objetos Track
+        self.tracks = []
         self.selected_index = None
         self.track_buttons = []
 
+        self.default_fg_color = None
+
         self._build_ui()
 
-    # 🔹 UI
+    # ───────────────────────────────
+    # UI
+    # ───────────────────────────────
     def _build_ui(self):
         self.title = ctk.CTkLabel(
             self,
@@ -23,7 +29,9 @@ class TrackList(ctk.CTkFrame):
         self.scroll = ctk.CTkScrollableFrame(self)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=5)
 
-    # 🔹 Carrega músicas na lista
+    # ───────────────────────────────
+    # Load tracks
+    # ───────────────────────────────
     def load_tracks(self, tracks):
         self.tracks = tracks
         self.selected_index = None
@@ -32,23 +40,51 @@ class TrackList(ctk.CTkFrame):
             widget.destroy()
 
         self.track_buttons.clear()
+        self.default_fg_color = None
 
         for index, track in enumerate(tracks):
             btn = ctk.CTkButton(
                 self.scroll,
-                text=f"{index + 1}. {track.title}",  # 🔹 Track tem atributo .title
+                text=f"{index + 1}. {track.title}",
                 anchor="w",
                 command=lambda i=index: self._select_track(i)
             )
+
+            if self.default_fg_color is None:
+                self.default_fg_color = btn.cget("fg_color")
+
             btn.pack(fill="x", pady=2)
             self.track_buttons.append(btn)
 
-    # 🔹 Seleção de música
+    # ───────────────────────────────
+    # Manual selection
+    # ───────────────────────────────
     def _select_track(self, index):
         self.selected_index = index
-
-        for i, btn in enumerate(self.track_buttons):
-            btn.configure(fg_color="#1f6aa5" if i == index else None)
+        self.set_highlight(index)
 
         if self.on_track_selected:
-            self.on_track_selected(self.tracks[index])  # 🔹 passa objeto Track
+            self.on_track_selected(self.tracks[index])
+
+    # ───────────────────────────────
+    # Highlight (manual + autoplay)
+    # ───────────────────────────────
+    def set_highlight(self, index):
+        self.highlighted_index = index
+        self.selected_index = index
+
+        highlight_color = ("#1f6aa5", "#144870")
+
+        for i, btn in enumerate(self.track_buttons):
+            if i == index:
+                btn.configure(
+                    fg_color=highlight_color,
+                    hover_color=highlight_color,
+                    text_color="white"
+                )
+            else:
+                btn.configure(
+                    fg_color=self.default_fg_color,
+                    hover_color=self.default_fg_color,
+                    text_color="white"
+                )

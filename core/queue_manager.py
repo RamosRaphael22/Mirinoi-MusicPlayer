@@ -53,3 +53,8 @@ class QueueManager:
             self.current_index = self.queue.index(current)
         else:
             self.current_index = 0
+
+    def clear(self):
+        self.queue.clear()
+        self.original_queue.clear()
+        self.current_index = 0
