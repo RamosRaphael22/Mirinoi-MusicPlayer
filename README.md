@@ -46,11 +46,18 @@ Mirinoi/
 │   ├── csv_service.py
 │   └── yt_service.py
 │
+├── models/
+│   ├── playlist.py
+│   └── track.py
+│
 ├── ui/
 │   ├── main_window.py
 │   ├── playlist_sidebar.py
 │   ├── track_list.py
 │   └── player_controls.py
+│
+├── utils/
+│   └── validators.py
 │
 └── README.md
 ```

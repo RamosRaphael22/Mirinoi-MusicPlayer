@@ -33,16 +33,18 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.btn_add = ctk.CTkButton(
             self,
             text="➕ Adicionar",
-            command=self._add_playlist_dialog
+            command=self._add_playlist_dialog,
+            hover_color="#3a8d02",
+            fg_color="#db03fc",
         )
         self.btn_add.pack(fill="x", padx=10, pady=(5, 2))
 
         self.btn_remove = ctk.CTkButton(
             self,
             text="❌ Remover",
-            fg_color="#8b0000",
             hover_color="#a00000",
-            command=self._remove_selected_playlist
+            command=self._remove_selected_playlist,
+            fg_color="#7f0092"
         )
         self.btn_remove.pack(fill="x", padx=10, pady=(2, 10))
 
@@ -59,7 +61,9 @@ class PlaylistSidebar(ctk.CTkFrame):
                 self.scroll,
                 text=playlist.name,
                 anchor="w",
-                command=lambda p=playlist: self._select_playlist(p)
+                command=lambda p=playlist: self._select_playlist(p),
+                fg_color="#db03fc",
+                hover_color="#bb16ca"
             )
             btn.pack(fill="x", pady=2, padx=5)
 
@@ -69,7 +73,7 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.selected_playlist_id = playlist.id
 
         for pid, btn in self.playlist_buttons.items():
-            btn.configure(fg_color="#08025C" if pid == playlist.id else "#1f6aa5")
+            btn.configure(fg_color="#bb16ca" if pid == playlist.id else "#db03fc")
 
 
         if self.on_select_callback:

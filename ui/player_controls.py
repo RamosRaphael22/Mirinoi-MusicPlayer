@@ -21,22 +21,23 @@ class PlayerControls(ctk.CTkFrame):
         self.on_prev = on_prev
         self.on_shuffle = on_shuffle
 
-        self._default_shuffle_color = "#1F6AA5"
+        self._default_shuffle_color = "#db03fc"
 
         self._build_ui()
 
     def _build_ui(self):
-        self.play_btn = ctk.CTkButton(self, text="▶", command=self.on_play)
-        self.pause_btn = ctk.CTkButton(self, text="⏸", command=self.on_pause)
-        self.prev_btn = ctk.CTkButton(self, text="⏮", command=self.on_prev)
-        self.next_btn = ctk.CTkButton(self, text="⏭", command=self.on_next)
+        self.play_btn = ctk.CTkButton(self, text="▶", command=self.on_play, fg_color="#db03fc", hover_color="#bb16ca")
+        self.pause_btn = ctk.CTkButton(self, text="⏸", command=self.on_pause, fg_color="#db03fc", hover_color="#bb16ca")
+        self.prev_btn = ctk.CTkButton(self, text="⏮", command=self.on_prev, fg_color="#db03fc", hover_color="#bb16ca")
+        self.next_btn = ctk.CTkButton(self, text="⏭", command=self.on_next, fg_color="#db03fc", hover_color="#bb16ca")
 
         self.shuffle_btn = ctk.CTkButton(
             self,
             text="🔀",
             command=self.on_shuffle,
-            fg_color=self._default_shuffle_color 
-        )
+            fg_color=self._default_shuffle_color,
+            hover_color="#bb16ca"
+            )
 
         self.prev_btn.pack(side="left", padx=5)
         self.play_btn.pack(side="left", padx=5)
@@ -46,6 +47,6 @@ class PlayerControls(ctk.CTkFrame):
 
     def set_shuffle_active(self, active: bool):
         if active:
-            self.shuffle_btn.configure(fg_color="#2ecc71")
+            self.shuffle_btn.configure(fg_color="#bb16ca")
         else:
             self.shuffle_btn.configure(fg_color=self._default_shuffle_color)
