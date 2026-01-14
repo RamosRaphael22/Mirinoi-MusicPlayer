@@ -2,37 +2,37 @@
 
 # 🎵 Mirinoi Player
 
-Mirinoi é um player de músicas feito **100% em Python**, com interface gráfica em **CustomTkinter**, focado em playlists do YouTube, reprodução automática, shuffle e destaque visual da música atual.
+Mirinoi is a music player built **100% in Python**, with a graphical interface using **CustomTkinter**, focused on YouTube playlists, automatic playback, shuffle, and visual highlighting of the currently playing track.
 
 ---
 
-## 🚀 Funcionalidades
+## 🚀 Features
 
-✔ Interface gráfica moderna (CustomTkinter)
+✔ Modern graphical interface (CustomTkinter)
 
-✔ Carregamento de playlists do YouTube Music
+✔ YouTube Music playlist loading
 
-✔ Reprodução automática da próxima faixa (autoplay)
+✔ Automatic playback of the next track (autoplay)
 
-✔ Controle de fila (next / previous)
+✔ Queue control (next / previous)
 
-✔ Shuffle com preservação da música atual
+✔ Shuffle while preserving the current track
 
-✔ Highlight da música em reprodução
+✔ Highlight of the currently playing song
 
-✔ Controle por botões (play, pause, next, prev)
+✔ Button-based controls (play, pause, next, prev)
 
-✔ Arquivo `.csv` para gerenciar playlists
+✔ `.csv` file for playlist management
 
-🔜 **Em desenvolvimento**
+🔜 **In development**
 
-* Pause real (retomar do ponto exato)
-* Integração com VLC
-* Máquina de estados do player (IDLE / PLAYING / PAUSED)
+* Real pause (resume from the exact position)
+* VLC integration
+* Player state machine (IDLE / PLAYING / PAUSED)
 
 ---
 
-## 🗂 Estrutura do Projeto
+## 🗂 Project Structure
 
 ```
 Mirinoi/
@@ -57,26 +57,26 @@ Mirinoi/
 
 ---
 
-## 🧰 Tecnologias Utilizadas
+## 🧰 Technologies Used
 
 * **Python 3.10+**
 * **CustomTkinter**
 * **yt-dlp**
 * **ffmpeg / ffplay**
-* **VLC (planejado)**
-* **python-vlc (planejado)**
+* **VLC (planned)**
+* **python-vlc (planned)**
 
 ---
 
-## 📦 Dependências
+## 📦 Dependencies
 
-Instale as dependências Python:
+Install the Python dependencies:
 
 ```bash
 pip install customtkinter yt-dlp
 ```
 
-⚠️ Certifique-se de que os executáveis abaixo estejam no **PATH**:
+⚠️ Make sure the following executables are available in your **PATH**:
 
 * `ffmpeg`
 * `ffplay`
@@ -84,9 +84,9 @@ pip install customtkinter yt-dlp
 
 ---
 
-## ▶️ Como Executar
+## ▶️ How to Run
 
-Na raiz do projeto:
+From the project root:
 
 ```bash
 python app.py
@@ -96,57 +96,58 @@ python app.py
 
 ## 📄 Playlists (CSV)
 
-O arquivo `playlists.csv` segue o formato:
+The `playlists.csv` file follows this format:
 
 ```csv
-nome,url
-Minha Playlist,https://www.youtube.com/playlist?list=XXXX
+name,url
+My Playlist,https://www.youtube.com/playlist?list=XXXX
 ```
 
 ---
 
-## 🎧 Funcionamento do Player
+## 🎧 Player Behavior
 
-* Clicar em uma música inicia a reprodução
-* A música atual é destacada visualmente
-* Ao terminar, a próxima toca automaticamente
-* Shuffle mantém a música atual ao ativar
-* Controles físicos via botões
-
----
-
-## ⚠️ Limitações Atuais
-
-* Pause ainda é simulado (stop)
-* Ao pausar, a música reinicia ao dar play
-* Isso será resolvido com **VLC + máquina de estados**
+* Clicking a song starts playback
+* The current song is visually highlighted
+* When a song ends, the next one plays automatically
+* Shuffle preserves the current song when enabled
+* Physical controls via buttons
 
 ---
 
-## 🛠 Próximos Passos Planejados
+## ⚠️ Current Limitations
 
-1. Substituir `ffplay` por **VLC**
-2. Implementar pause real (play / pause / resume)
-3. Criar máquina de estados do player
-4. Melhorar sincronização UI ↔ áudio
-5. Tratar erros de concorrência (threads)
+* Pause is still simulated (stop)
+* When paused, the song restarts on play
+* This will be solved with **VLC + a state machine**
 
 ---
 
-## 👨‍💻 Autor
+## 🛠 Planned Next Steps
 
-Projeto desenvolvido por **Raphael Ramos Cavalcante**
+1. Replace `ffplay` with **VLC**
+2. Implement real pause (play / pause / resume)
+3. Create a player state machine
+4. Improve UI ↔ audio synchronization
+5. Handle concurrency issues (threads)
 
-Curso: Análise e Desenvolvimento de Sistemas
+---
 
-Linguagem principal: Python 🐍
+## 👨‍💻 Author
+
+Project developed by **Raphael Ramos Cavalcante**
+
+Degree: Systems Analysis and Development
+
+Main language: Python 🐍
 
 ---
 
-## 🧠 Observação Importante
+## 🧠 Important Note
 
-Este projeto é **educacional** e experimental.
+This project is **educational** and experimental.
 
-Use playlists públicas e respeite os termos do YouTube.
+Use public playlists and respect YouTube’s terms of service.
 
 ---
+
