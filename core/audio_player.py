@@ -2,7 +2,6 @@ import subprocess
 import threading
 from enum import Enum
 
-# Audio player status
 class PlayerState(Enum):
     STOPPED = "stopped"
     PLAYING = "playing"
@@ -25,7 +24,6 @@ class AudioPlayer:
 
         self.on_finished = None
 
-    # Play audio from a video URL
     def play(self, video_url: str):
         with self._lock:
             if self.state == PlayerState.PLAYING:
@@ -44,7 +42,6 @@ class AudioPlayer:
                 daemon=True
             ).start()
 
-    # Reproduction thread
     def _play_thread(self, play_id: int):
         try:
             audio_url = self._get_audio_stream_url(self.current_url)
