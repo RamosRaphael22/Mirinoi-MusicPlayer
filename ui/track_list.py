@@ -51,7 +51,9 @@ class TrackList(ctk.CTkFrame):
                 self.scroll,
                 text=text,
                 anchor="w",
-                command=lambda i=index: self._select_track(i)
+                command=lambda i=index: self._select_track(i),
+                fg_color="#db03fc",
+                hover_color="#bb16ca"
             )
 
             if self.default_fg_color is None:
@@ -71,7 +73,7 @@ class TrackList(ctk.CTkFrame):
         self.highlighted_index = index
         self.selected_index = index
 
-        highlight_color = ("#1f6aa5", "#144870")
+        highlight_color = ("#db03fc", "#bb16ca")
 
         for i, btn in enumerate(self.track_buttons):
             if i == index:
