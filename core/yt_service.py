@@ -39,8 +39,15 @@ class YouTubeService:
                     if not data.get("title") or not data.get("id"):
                         continue
 
+                    artist = (
+                        data.get("artist")
+                        or data.get("uploader")
+                        or data.get("channel")
+                    )
+
                     track = Track(
                         title=data.get("title"),
+                        artist=artist,
                         url=f"https://music.youtube.com/watch?v={data.get('id')}"
                     )
                     tracks.append(track)
@@ -73,8 +80,15 @@ class YouTubeService:
             if not data.get("title") or not data.get("id"):
                 return None
 
+            artist = (
+                data.get("artist")
+                or data.get("uploader")
+                or data.get("channel")
+            )
+
             return Track(
                 title=data.get("title"),
+                artist=artist,
                 url=f"https://music.youtube.com/watch?v={data.get('id')}"
             )
 

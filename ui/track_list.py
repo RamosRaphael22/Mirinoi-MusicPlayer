@@ -41,9 +41,15 @@ class TrackList(ctk.CTkFrame):
         self.default_fg_color = None
 
         for index, track in enumerate(tracks):
+            text = (
+                f"{index + 1}. {track.title} - {track.artist}"
+                if track.artist
+                else f"{index + 1}. {track.title}"
+            )
+
             btn = ctk.CTkButton(
                 self.scroll,
-                text=f"{index + 1}. {track.title}",
+                text=text,
                 anchor="w",
                 command=lambda i=index: self._select_track(i)
             )
