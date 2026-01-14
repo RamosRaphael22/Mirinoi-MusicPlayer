@@ -48,7 +48,7 @@ Mirinoi/
 │
 ├── models/
 │   ├── playlist.py
-│   ├── track.py
+│   └── track.py
 │
 ├── ui/
 │   ├── main_window.py
@@ -57,7 +57,7 @@ Mirinoi/
 │   └── player_controls.py
 │
 ├── utils/
-│   ├── validators.py
+│   └── validators.py
 │
 └── README.md
 ```
