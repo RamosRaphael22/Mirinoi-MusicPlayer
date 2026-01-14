@@ -30,7 +30,7 @@ class PlaylistModal(Toplevel):
 
     def _build_ui(self):
         container = ctk.CTkFrame(self)
-        container.pack(fill="both", expand=True, padx=15, pady=15)
+        container.pack(fill="both", expand=True, padx=2, pady=2)
 
         name_label = ctk.CTkLabel(container, text="Nome da playlist:")
         name_label.pack(anchor="w", pady=(0, 2))
@@ -51,15 +51,17 @@ class PlaylistModal(Toplevel):
         add_btn = ctk.CTkButton(
             btn_frame,
             text="Adicionar",
-            command=self._on_ok
+            command=self._on_ok,
+            hover_color="#3a8d02",
+            fg_color="#db03fc",
         )
         add_btn.pack(side="left", padx=5)
 
         cancel_btn = ctk.CTkButton(
             btn_frame,
             text="Cancelar",
-            fg_color="#444",
-            hover_color="#555",
+            fg_color="#7f0092",
+            hover_color="#a00000",
             command=self._on_cancel
         )
         cancel_btn.pack(side="left", padx=5)
