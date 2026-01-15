@@ -12,6 +12,7 @@ class PlayerControls(ctk.CTkFrame):
         on_next=None,
         on_prev=None,
         on_shuffle=None,
+        on_loop=None
     ):
         super().__init__(parent, height=80)
 
@@ -20,8 +21,10 @@ class PlayerControls(ctk.CTkFrame):
         self.on_next = on_next
         self.on_prev = on_prev
         self.on_shuffle = on_shuffle
+        self.on_loop = on_loop
 
         self._default_shuffle_color = "#db03fc"
+        self._default_loop_color = "#db03fc"
 
         self._build_ui()
 
@@ -38,15 +41,23 @@ class PlayerControls(ctk.CTkFrame):
             fg_color=self._default_shuffle_color,
             hover_color="#bb16ca"
             )
+        self.loop_btn = ctk.CTkButton(self, text="🔁", command=self.on_loop, fg_color="#db03fc", hover_color="#bb16ca")
 
         self.prev_btn.pack(side="left", padx=5)
         self.play_btn.pack(side="left", padx=5)
         self.pause_btn.pack(side="left", padx=5)
         self.next_btn.pack(side="left", padx=5)
         self.shuffle_btn.pack(side="left", padx=5)
+        self.loop_btn.pack(side="left", padx=5)
 
     def set_shuffle_active(self, active: bool):
         if active:
             self.shuffle_btn.configure(fg_color="#bb16ca")
         else:
             self.shuffle_btn.configure(fg_color=self._default_shuffle_color)
+
+    def set_loop_active(self, active: bool):
+        if active:
+            self.loop_btn.configure(fg_color="#bb16ca")
+        else:
+            self.loop_btn.configure(fg_color=self._default_shuffle_color)

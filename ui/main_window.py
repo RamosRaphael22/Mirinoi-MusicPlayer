@@ -27,6 +27,7 @@ class MainWindow(ctk.CTk):
 
         self.player_state = self.STOPPED
         self.shuffle_enabled = False
+        self.loop_enabled = False
 
         self.title("Mirinoi Player")
         self.geometry("900x600")
@@ -67,7 +68,8 @@ class MainWindow(ctk.CTk):
             on_pause=self._pause,
             on_next=self._play_next,
             on_prev=self._play_prev,
-            on_shuffle=self._toggle_shuffle
+            on_shuffle=self._toggle_shuffle,
+            on_loop=self._toggle_loop
         )
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
 
@@ -130,7 +132,13 @@ class MainWindow(ctk.CTk):
 
     def _play_next(self):
         track = self.queue_manager.next()
+
         if not track:
+            if self.loop_enabled and self.queue_manager.queue:
+                self.queue_manager.current_index = 0
+                self._force_play_current()
+            else:
+                self._stop_player()
             return
 
         self._force_play_current()
@@ -168,3 +176,8 @@ class MainWindow(ctk.CTk):
     def _on_close(self):
         self._stop_player()
         self.destroy()
+
+    def _toggle_loop(self):
+        self.loop_enabled = not self.loop_enabled
+        self.controls.set_loop_active(self.loop_enabled)
+
