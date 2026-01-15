@@ -28,14 +28,24 @@ class QueueManager:
     def next(self):
         if not self.queue:
             return None
-        self.current_index = (self.current_index + 1) % len(self.queue)
+
+        if self.current_index + 1 >= len(self.queue):
+            return None
+
+        self.current_index += 1
         return self.current()
+
 
     def prev(self):
         if not self.queue:
             return None
-        self.current_index = (self.current_index - 1) % len(self.queue)
+
+        if self.current_index - 1 < 0:
+            return None
+
+        self.current_index -= 1
         return self.current()
+
 
     def shuffle(self):
         if not self.queue:
