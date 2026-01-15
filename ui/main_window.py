@@ -47,8 +47,10 @@ class MainWindow(ctk.CTk):
         self.sidebar = PlaylistSidebar(
             self,
             csv_service=self.csv_service,
-            on_select_callback=self._on_playlist_selected
+            on_select_callback=self._on_playlist_selected,
+            on_remove_callback=self._on_playlist_removed
         )
+
         self.sidebar.grid(row=0, column=0, sticky="ns")
 
         self.track_list = TrackList(
@@ -155,3 +157,8 @@ class MainWindow(ctk.CTk):
         self.track_list.load_tracks(self.queue_manager.queue)
         self.track_list.set_highlight(self.queue_manager.current_index)
         self.controls.set_shuffle_active(self.shuffle_enabled)
+
+    def _on_playlist_removed(self, playlist_id):
+        self._stop_player()
+        self.queue_manager.set_queue([])
+        self.track_list.load_tracks([])

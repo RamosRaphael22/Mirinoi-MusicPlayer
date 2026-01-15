@@ -8,10 +8,11 @@ from ui.playlist_modal import PlaylistModal
 # Calls callback on playlist selection
 # Highlights selected playlist
 class PlaylistSidebar(ctk.CTkFrame):
-    def __init__(self, parent, csv_service, on_select_callback=None):
+    def __init__(self, parent, csv_service, on_select_callback=None, on_remove_callback=None):
         super().__init__(parent, width=220)
         self.csv_service = csv_service
         self.on_select_callback = on_select_callback
+        self.on_remove_callback = on_remove_callback
 
         self.selected_playlist_id = None
         self.playlist_buttons = {}
@@ -102,6 +103,10 @@ class PlaylistSidebar(ctk.CTkFrame):
         )
 
         if confirm:
-            self.csv_service.remove_playlist(self.selected_playlist_id)
+            removed_id = self.selected_playlist_id
+            self.csv_service.remove_playlist(removed_id)
             self.selected_playlist_id = None
             self._load_playlists()
+
+            if self.on_remove_callback:
+                self.on_remove_callback(removed_id)
