@@ -38,6 +38,8 @@ class MainWindow(ctk.CTk):
 
         self.audio_player.on_finished = self._on_track_finished
 
+        self.protocol("WM_DELETE_WINDOW", self._on_close)
+
         self._build_layout()
 
     def _build_layout(self):
@@ -162,3 +164,7 @@ class MainWindow(ctk.CTk):
         self._stop_player()
         self.queue_manager.set_queue([])
         self.track_list.load_tracks([])
+
+    def _on_close(self):
+        self._stop_player()
+        self.destroy()
