@@ -64,6 +64,42 @@ Mirinoi/
 
 ---
 
+## 🔁 Application Flow
+
+1. The application starts and loads playlists from `playlists.csv`
+2. Playlists are displayed in the sidebar
+3. The user selects a playlist
+4. **yt-dlp** fetches track metadata using a flat playlist extraction
+5. The track list is rendered in the UI
+6. The user selects a track to play
+7. **yt-dlp** generates a direct audio streaming URL
+8. **ffplay** streams the audio
+9. The `queue_manager` handles navigation and shuffle logic
+
+---
+
+## 🧠 Technical Decisions
+
+* **CustomTkinter**
+  Chosen for its modern appearance, theming support, and improved UX compared to standard Tkinter.
+
+* **yt-dlp**
+  Used to retrieve playlist metadata and direct audio stream URLs without relying on the official YouTube API.
+
+* **ffplay**
+  Provides lightweight and reliable audio streaming via HTTP.
+
+* **Threading**
+  All blocking operations (yt-dlp and ffplay execution) run in background threads to keep the UI responsive.
+
+* **CSV Storage**
+  A simple, portable solution for persisting user playlists, easily replaceable with a database in the future.
+
+* **Layered Architecture**
+  The UI layer never directly interacts with external services or subprocesses.
+
+---
+
 ## 🧰 Technologies Used
 
 * **Python 3.10+**
