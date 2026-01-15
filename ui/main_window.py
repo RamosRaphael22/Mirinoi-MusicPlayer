@@ -74,7 +74,7 @@ class MainWindow(ctk.CTk):
     def _on_playlist_selected(self, playlist):
         self._stop_player()
 
-        self.track_list.load_tracks([])
+        self.track_list.show_loading()
         self.queue_manager.set_queue([])
 
         threading.Thread(

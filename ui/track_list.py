@@ -30,6 +30,23 @@ class TrackList(ctk.CTkFrame):
         self.scroll = ctk.CTkScrollableFrame(self)
         self.scroll.pack(fill="both", expand=True, padx=10, pady=5)
 
+    def show_loading(self):
+        self.tracks = []
+        self.selected_index = None
+
+        for widget in self.scroll.winfo_children():
+            widget.destroy()
+
+        self.track_buttons.clear()
+        self.default_fg_color = None
+
+        label = ctk.CTkLabel(
+            self.scroll,
+            text="Carregando músicas...",
+            font=ctk.CTkFont(size=14, weight="bold")
+        )
+        label.pack(pady=20)
+
     def load_tracks(self, tracks):
         self.tracks = tracks
         self.selected_index = None
