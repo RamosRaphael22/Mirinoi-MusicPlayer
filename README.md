@@ -1,5 +1,3 @@
----
-
 # 🎵 Mirinoi Player
 
 **Mirinoi** is a desktop music player built **100% in Python**, featuring a modern graphical interface using **CustomTkinter** and focused on **YouTube playlist streaming**, queue management, shuffle, loop, and accurate playback control using **VLC**.
@@ -278,5 +276,3 @@ Main language: Python 🐍
 This project is **educational and experimental**.
 
 Use public playlists and respect YouTube’s terms of service.
-
----
