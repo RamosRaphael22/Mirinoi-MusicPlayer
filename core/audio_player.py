@@ -49,6 +49,8 @@ class AudioPlayer:
             ).start()
 
     def _play_thread(self, play_id: int):
+        finished_naturally = False
+        
         try:
             audio_url = self._get_audio_stream_url(self.current_url)
 
