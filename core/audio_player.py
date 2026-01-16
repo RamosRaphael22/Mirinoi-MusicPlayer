@@ -1,6 +1,9 @@
-import subprocess
 import threading
+import subprocess
+import time
 from enum import Enum
+import vlc
+
 
 class PlayerState(Enum):
     STOPPED = "stopped"
@@ -8,13 +11,16 @@ class PlayerState(Enum):
     PAUSED = "paused"
 
 # Audio player class
-# Manages audio playback using ffplay and yt-dlp
+# Manages audio playback using VLC
 # Supports play, pause, and stop functionalities
 # Calls a callback function when playback finishes naturally
-# Usage of threading to handle playback in the background
+# Uses threading to handle playback in the background
+# Monitors real VLC playback state to avoid false track endings
 class AudioPlayer:
     def __init__(self):
-        self.ffplay_process = None
+        self.instance = vlc.Instance("--no-video")
+        self.player = self.instance.media_player_new()
+
         self.current_url = None
         self.state = PlayerState.STOPPED
 
@@ -46,25 +52,32 @@ class AudioPlayer:
         try:
             audio_url = self._get_audio_stream_url(self.current_url)
 
-            with self._lock:
-                if play_id != self._play_id:
-                    return
+            media = self.instance.media_new(audio_url)
+            self.player.set_media(media)
+            self.player.play()
 
-                self.ffplay_process = subprocess.Popen(
-                    [
-                       "ffplay",
-                        "-nodisp",
-                        "-autoexit",
-                        "-loglevel",
-                        "quiet",
-                        audio_url
-                    ],
-                    stdin=subprocess.PIPE,
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+            timeout = time.time() + 5
+            while time.time() < timeout:
+                if self.player.get_state() == vlc.State.Playing:
+                    break
+                time.sleep(0.1)
 
-            self.ffplay_process.wait()
+            if self.player.get_state() != vlc.State.Playing:
+                with self._lock:
+                    self.state = PlayerState.STOPPED
+                return
+
+            while True:
+                with self._lock:
+                    if play_id != self._play_id or self._stop_requested:
+                        return
+
+                state = self.player.get_state()
+                if state in (vlc.State.Ended, vlc.State.Error):
+                    break
+
+                time.sleep(0.3)
+
             finished_naturally = not self._stop_requested
 
         except Exception:
@@ -75,7 +88,6 @@ class AudioPlayer:
                 if play_id != self._play_id:
                     return
 
-                self.ffplay_process = None
                 self.state = PlayerState.STOPPED
 
             if finished_naturally and self.on_finished:
@@ -87,23 +99,15 @@ class AudioPlayer:
                 return
 
             self._stop_requested = True
-            self._terminate_process()
+            self.player.stop()
             self.state = PlayerState.PAUSED
 
     def stop(self):
         with self._lock:
             self._stop_requested = True
             self._play_id += 1
-            self._terminate_process()
+            self.player.stop()
             self.state = PlayerState.STOPPED
-
-    def _terminate_process(self):
-        if self.ffplay_process:
-            try:
-                self.ffplay_process.kill()
-            except Exception:
-                pass
-            self.ffplay_process = None
 
     def _get_audio_stream_url(self, video_url: str) -> str:
         result = subprocess.check_output(
