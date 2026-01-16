@@ -3,7 +3,7 @@ import threading
 
 from core.csv_service import CSVService
 from core.yt_service import YouTubeService
-from core.audio_player import AudioPlayer
+from core.audio_player import AudioPlayer, PlayerState
 from core.queue_manager import QueueManager
 
 from ui.playlist_sidebar import PlaylistSidebar
@@ -18,14 +18,9 @@ from ui.player_controls import PlayerControls
 # Responds to track completion events to autoplay next track
 # Coordinates between CSV service, YouTube service, audio player, and queue manager
 class MainWindow(ctk.CTk):
-    STOPPED = "STOPPED"
-    PLAYING = "PLAYING"
-    PAUSED = "PAUSED"
-
     def __init__(self):
         super().__init__()
 
-        self.player_state = self.STOPPED
         self.shuffle_enabled = False
         self.loop_enabled = False
 
@@ -93,18 +88,15 @@ class MainWindow(ctk.CTk):
         self.queue_manager.set_queue(tracks)
         self.track_list.load_tracks(tracks)
 
-        self.player_state = self.STOPPED
-
     def _on_track_selected(self, track):
         self.queue_manager.current_index = self.track_list.selected_index
         self._force_play_current()
 
     def _play_current(self):
-        if self.player_state == self.PLAYING:
+        if self.audio_player.state == PlayerState.PLAYING:
             return
 
-        if self.player_state in (self.STOPPED, self.PAUSED):
-            self._force_play_current()
+        self._force_play_current()
 
     def _force_play_current(self):
         track = self.queue_manager.current()
@@ -117,18 +109,15 @@ class MainWindow(ctk.CTk):
         self.audio_player.play(track.url)
 
         self.track_list.set_highlight(index)
-        self.player_state = self.PLAYING
 
     def _pause(self):
-        if self.player_state != self.PLAYING:
+        if self.audio_player.state != PlayerState.PLAYING:
             return
 
-        self.audio_player.stop()
-        self.player_state = self.PAUSED
+        self.audio_player.pause()
 
     def _stop_player(self):
         self.audio_player.stop()
-        self.player_state = self.STOPPED
 
     def _play_next(self):
         track = self.queue_manager.next()
@@ -151,7 +140,7 @@ class MainWindow(ctk.CTk):
         self._force_play_current()
 
     def _on_track_finished(self):
-        if self.player_state != self.PLAYING:
+        if self.audio_player.state != PlayerState.STOPPED:
             return
 
         self.after(0, self._play_next)
@@ -180,4 +169,3 @@ class MainWindow(ctk.CTk):
     def _toggle_loop(self):
         self.loop_enabled = not self.loop_enabled
         self.controls.set_loop_active(self.loop_enabled)
-
