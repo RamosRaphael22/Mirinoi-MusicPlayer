@@ -27,11 +27,41 @@ class AudioPlayer:
         self._lock = threading.RLock()
         self._play_id = 0
         self._stop_requested = False
+        self._paused_time_ms = 0
 
         self.on_finished = None
 
     def play(self, video_url: str):
         with self._lock:
+            if self.state == PlayerState.PAUSED and self.current_url == video_url:
+                self._stop_requested = False
+
+                if self.player.get_state() == vlc.State.Paused:
+                    self.player.pause()
+                    self.state = PlayerState.PLAYING
+
+                    if self._paused_time_ms > 0:
+                        time.sleep(0.05)
+                        try:
+                            self.player.set_time(self._paused_time_ms)
+                        except Exception:
+                            pass
+                    return
+
+                self._play_id += 1
+                local_id = self._play_id
+
+                self._stop_requested = False
+                self.current_url = video_url
+                self.state = PlayerState.PLAYING
+
+                threading.Thread(
+                    target=self._play_thread,
+                    args=(local_id, self._paused_time_ms),
+                    daemon=True
+                ).start()
+                return
+
             if self.state == PlayerState.PLAYING:
                 return
 
@@ -41,16 +71,17 @@ class AudioPlayer:
             self._stop_requested = False
             self.current_url = video_url
             self.state = PlayerState.PLAYING
+            self._paused_time_ms = 0
 
             threading.Thread(
                 target=self._play_thread,
-                args=(local_id,),
+                args=(local_id, 0),
                 daemon=True
             ).start()
 
-    def _play_thread(self, play_id: int):
+    def _play_thread(self, play_id: int, resume_time_ms: int = 0):
         finished_naturally = False
-        
+
         try:
             audio_url = self._get_audio_stream_url(self.current_url)
 
@@ -60,14 +91,24 @@ class AudioPlayer:
 
             timeout = time.time() + 5
             while time.time() < timeout:
-                if self.player.get_state() == vlc.State.Playing:
+                state = self.player.get_state()
+                if state in (vlc.State.Playing, vlc.State.Paused):
                     break
                 time.sleep(0.1)
 
-            if self.player.get_state() != vlc.State.Playing:
+            state = self.player.get_state()
+            if state not in (vlc.State.Playing, vlc.State.Paused):
                 with self._lock:
-                    self.state = PlayerState.STOPPED
+                    if play_id == self._play_id:
+                        self.state = PlayerState.STOPPED
                 return
+
+            if resume_time_ms > 0:
+                try:
+                    time.sleep(0.05)
+                    self.player.set_time(resume_time_ms)
+                except Exception:
+                    pass
 
             while True:
                 with self._lock:
@@ -75,6 +116,19 @@ class AudioPlayer:
                         return
 
                 state = self.player.get_state()
+
+                if state == vlc.State.Paused:
+                    with self._lock:
+                        if play_id == self._play_id:
+                            self.state = PlayerState.PAUSED
+                    time.sleep(0.2)
+                    continue
+
+                if state == vlc.State.Playing:
+                    with self._lock:
+                        if play_id == self._play_id:
+                            self.state = PlayerState.PLAYING
+
                 if state in (vlc.State.Ended, vlc.State.Error):
                     break
 
@@ -91,6 +145,7 @@ class AudioPlayer:
                     return
 
                 self.state = PlayerState.STOPPED
+                self._paused_time_ms = 0
 
             if finished_naturally and self.on_finished:
                 self.on_finished()
@@ -100,8 +155,14 @@ class AudioPlayer:
             if self.state != PlayerState.PLAYING:
                 return
 
-            self._stop_requested = True
-            self.player.stop()
+            try:
+                current_time = self.player.get_time()
+                if current_time is not None and current_time > 0:
+                    self._paused_time_ms = int(current_time)
+            except Exception:
+                self._paused_time_ms = 0
+
+            self.player.pause()
             self.state = PlayerState.PAUSED
 
     def stop(self):
@@ -110,6 +171,7 @@ class AudioPlayer:
             self._play_id += 1
             self.player.stop()
             self.state = PlayerState.STOPPED
+            self._paused_time_ms = 0
 
     def _get_audio_stream_url(self, video_url: str) -> str:
         result = subprocess.check_output(

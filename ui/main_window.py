@@ -59,13 +59,13 @@ class MainWindow(ctk.CTk):
 
         self.controls = PlayerControls(
             self,
-            on_play=self._play_current,
-            on_pause=self._pause,
+            on_play_pause=self._on_play_pause,
             on_next=self._play_next,
             on_prev=self._play_prev,
             on_shuffle=self._toggle_shuffle,
             on_loop=self._toggle_loop
         )
+
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
 
     def _on_playlist_selected(self, playlist):
@@ -93,10 +93,12 @@ class MainWindow(ctk.CTk):
         self._force_play_current()
 
     def _play_current(self):
-        if self.audio_player.state == PlayerState.PLAYING:
+        track = self.queue_manager.current()
+        if not track:
             return
 
-        self._force_play_current()
+        self.audio_player.play(track.url)
+        self.controls.set_playing(self.audio_player.state == PlayerState.PLAYING)
 
     def _force_play_current(self):
         track = self.queue_manager.current()
@@ -109,15 +111,15 @@ class MainWindow(ctk.CTk):
         self.audio_player.play(track.url)
 
         self.track_list.set_highlight(index)
+        self.controls.set_playing(True)
 
     def _pause(self):
-        if self.audio_player.state != PlayerState.PLAYING:
-            return
-
         self.audio_player.pause()
+        self.controls.set_playing(False)
 
     def _stop_player(self):
         self.audio_player.stop()
+        self.controls.set_playing(False)
 
     def _play_next(self):
         track = self.queue_manager.next()
@@ -169,3 +171,18 @@ class MainWindow(ctk.CTk):
     def _toggle_loop(self):
         self.loop_enabled = not self.loop_enabled
         self.controls.set_loop_active(self.loop_enabled)
+
+    def _on_play_pause(self):
+        state = self.audio_player.state
+
+        if state == PlayerState.PLAYING:
+            self.audio_player.pause()
+            self.controls.set_playing(False)
+            return
+
+        track = self.queue_manager.current()
+        if not track:
+            return
+
+        self.audio_player.play(track.url)
+        self.controls.set_playing(True)
