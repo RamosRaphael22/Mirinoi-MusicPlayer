@@ -150,10 +150,11 @@ VLC is used as the **audio playback engine**, providing:
 * Real pause / resume functionality
 * Reliable playback state detection
 
-> ⚠️ VLC must be installed on the system.
-> The VLC executable **does not need** to be available in `PATH`, but it is recommended.
+⚠️ VLC must be installed on the system.
+The VLC executable **does not need** to be available in `PATH`, but it is recommended.
 
-Download: [https://www.videolan.org/vlc/](https://www.videolan.org/vlc/)
+Download (official site):
+[https://www.videolan.org/vlc/](https://www.videolan.org/vlc/)
 
 ---
 
@@ -164,11 +165,17 @@ Download: [https://www.videolan.org/vlc/](https://www.videolan.org/vlc/)
 * Fetch playlist metadata
 * Generate direct audio streaming URLs from YouTube
 
-Make sure `yt-dlp` is accessible from the command line:
+Installation options:
 
-```bash
+Option 1 — via pip (recommended for Python users):
+pip install yt-dlp
+
+Option 2 — standalone binary (recommended for non-Python users):
+Download from the official GitHub releases page and add it to PATH:
+[https://github.com/yt-dlp/yt-dlp/releases](https://github.com/yt-dlp/yt-dlp/releases)
+
+Verify installation:
 yt-dlp --version
-```
 
 ---
 
@@ -181,11 +188,11 @@ However, FFmpeg is **recommended** because:
 * `yt-dlp` may rely on FFmpeg in fallback scenarios
 * Some formats and edge cases require FFmpeg for best compatibility
 
-If installed, ensure it is available in `PATH`:
+Download (official site):
+[https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
 
-```bash
+After installation, ensure it is available in PATH:
 ffmpeg -version
-```
 
 ---
 
