@@ -122,7 +122,7 @@ A simple, portable solution for playlist persistence, easily replaceable by a da
 * **yt-dlp**
 * **VLC**
 * **python-vlc**
-* **ffmpeg** (dependency of VLC)
+* **FFmpeg** (optional, recommended for yt-dlp compatibility)
 
 ---
 
