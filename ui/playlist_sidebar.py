@@ -29,7 +29,7 @@ class PlaylistSidebar(ctk.CTkFrame):
             self,
             text="Playlists",
             font=ctk.CTkFont(size=16, weight="bold"),
-            text_color="#EDEDF2"
+            text_color=TEXT
         )
         self.title.pack(pady=10)
 
