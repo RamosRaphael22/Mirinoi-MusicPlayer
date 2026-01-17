@@ -4,7 +4,6 @@ import time
 from enum import Enum
 import vlc
 
-
 class PlayerState(Enum):
     STOPPED = "stopped"
     PLAYING = "playing"
@@ -32,11 +31,14 @@ class AudioPlayer:
         self.on_finished = None
 
         self._volume = 20
+
+        self._last_known_track_duration_ms = 0
         try:
             self.player.audio_set_volume(self._volume)
         except Exception:
             pass
 
+        self._last_known_track_duration_ms = 0    
 
     def play(self, video_url: str):
         with self._lock:
@@ -79,6 +81,8 @@ class AudioPlayer:
             self.current_url = video_url
             self.state = PlayerState.PLAYING
             self._paused_time_ms = 0
+
+            self._last_known_track_duration_ms = 0
 
             threading.Thread(
                 target=self._play_thread,
@@ -184,6 +188,7 @@ class AudioPlayer:
             self.player.stop()
             self.state = PlayerState.STOPPED
             self._paused_time_ms = 0
+            self._last_known_track_duration_ms = 0
 
     def _get_audio_stream_url(self, video_url: str) -> str:
         result = subprocess.check_output(
@@ -211,3 +216,39 @@ class AudioPlayer:
             except Exception:
                 pass
             return self._volume
+            
+    def get_current_playback_time_ms(self) -> int:
+        with self._lock:
+            try:
+                current_time = self.player.get_time()
+                return int(current_time) if current_time and current_time > 0 else 0
+            except Exception:
+                return 0
+
+    def get_track_duration_ms(self) -> int:
+        with self._lock:
+            try:
+                duration = self.player.get_length()
+                duration_ms = int(duration) if duration and duration > 0 else 0
+
+                if duration_ms > 0:
+                    self._last_known_track_duration_ms = duration_ms
+
+                return self._last_known_track_duration_ms
+            except Exception:
+                return self._last_known_track_duration_ms
+
+    def get_playback_progress_ratio(self) -> float:
+        track_duration_ms = self.get_track_duration_ms()
+        if track_duration_ms <= 0:
+            return 0.0
+
+        current_time_ms = self.get_current_playback_time_ms()
+        progress_ratio = current_time_ms / track_duration_ms
+
+        if progress_ratio < 0:
+            return 0.0
+        if progress_ratio > 1:
+            return 1.0
+        return progress_ratio
+

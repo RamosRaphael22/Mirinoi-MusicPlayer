@@ -38,6 +38,9 @@ class MainWindow(ctk.CTk):
 
         self._build_layout()
 
+        self._playback_progress_update_job = None
+        self._schedule_playback_progress_updates()
+
     def _build_layout(self):
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
@@ -121,6 +124,7 @@ class MainWindow(ctk.CTk):
 
     def _stop_player(self):
         self.audio_player.stop()
+        self.controls.update_playback_progress(0.0, 0, 0)
         self.controls.set_playing(False)
 
     def _play_next(self):
@@ -167,6 +171,12 @@ class MainWindow(ctk.CTk):
         self.track_list.load_tracks([])
 
     def _on_close(self):
+        if self._playback_progress_update_job is not None:
+            try:
+                self.after_cancel(self._playback_progress_update_job)
+            except Exception:
+                pass
+
         self._stop_player()
         self.destroy()
 
@@ -191,3 +201,28 @@ class MainWindow(ctk.CTk):
 
     def _on_volume_change(self, value):
         self.audio_player.set_volume(int(value))
+
+    def _schedule_playback_progress_updates(self):
+        self._update_playback_progress_ui()
+
+
+    def _update_playback_progress_ui(self):
+        if self.audio_player.state in (PlayerState.PLAYING, PlayerState.PAUSED):
+            current_time_ms = self.audio_player.get_current_playback_time_ms()
+            track_duration_ms = self.audio_player.get_track_duration_ms()
+            progress_ratio = self.audio_player.get_playback_progress_ratio()
+
+            self.controls.update_playback_progress(
+                progress_ratio=progress_ratio,
+                current_time_ms=current_time_ms,
+                track_duration_ms=track_duration_ms
+            )
+        else:
+            self.controls.update_playback_progress(
+                progress_ratio=0.0,
+                current_time_ms=0,
+                track_duration_ms=0
+            )
+
+        self._playback_progress_update_job = self.after(200, self._update_playback_progress_ui)
+

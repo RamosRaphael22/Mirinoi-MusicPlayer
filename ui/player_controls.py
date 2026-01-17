@@ -60,12 +60,19 @@ class PlayerControls(ctk.CTkFrame):
 
         self.volume_slider = ctk.CTkSlider(self, from_=0, to=100, width=150,number_of_steps=100, command=self.on_volume_change)
 
+        self.playback_progress_bar = ctk.CTkProgressBar(self, width=200)
+        self.playback_progress_bar.set(0)
+
+        self.playback_time_label = ctk.CTkLabel(self, text="0:00 / 0:00")
+
         self.prev_btn.pack(side="left", padx=5)
         self.play_pause_btn.pack(side="left", padx=5)
         self.next_btn.pack(side="left", padx=5)
         self.shuffle_btn.pack(side="left", padx=5)
         self.loop_btn.pack(side="left", padx=5)
-        self.volume_slider.pack(side="left", padx=5)
+        self.playback_progress_bar.pack(side="left", padx=5)
+        self.playback_time_label.pack(side="left", padx=5)
+        self.volume_slider.pack(side="left", padx=15)
 
     def set_playing(self, is_playing: bool):
         self.play_pause_btn.configure(text="⏸" if is_playing else "▶")
@@ -79,3 +86,19 @@ class PlayerControls(ctk.CTkFrame):
         self.loop_btn.configure(
             fg_color="#bb16ca" if active else self._default_loop_color
         )
+
+    def update_playback_progress(self, progress_ratio: float, current_time_ms: int, track_duration_ms: int):
+        progress_ratio = max(0.0, min(1.0, float(progress_ratio)))
+        self.playback_progress_bar.set(progress_ratio)
+
+        formatted_current = self._format_milliseconds_to_time(current_time_ms)
+        formatted_total = self._format_milliseconds_to_time(track_duration_ms)
+
+        self.playback_time_label.configure(text=f"{formatted_current} / {formatted_total}")
+
+    def _format_milliseconds_to_time(self, milliseconds: int) -> str:
+        total_seconds = max(0, int(milliseconds) // 1000)
+        minutes = total_seconds // 60
+        seconds = total_seconds % 60
+        return f"{minutes}:{seconds:02d}"
+
