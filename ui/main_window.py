@@ -25,7 +25,7 @@ class MainWindow(ctk.CTk):
         self.loop_enabled = False
 
         self.title("Mirinoi Player")
-        self.geometry("900x600")
+        self.after(10, self._maximize)
 
         self.csv_service = CSVService("playlists.csv")
         self.yt_service = YouTubeService()
@@ -40,6 +40,12 @@ class MainWindow(ctk.CTk):
 
         self._playback_progress_update_job = None
         self._schedule_playback_progress_updates()
+
+    def _maximize(self):
+        try:
+            self.state("zoomed")
+        except Exception:
+            self.wm_state("zoomed")
 
     def _build_layout(self):
         self.grid_columnconfigure(1, weight=1)
