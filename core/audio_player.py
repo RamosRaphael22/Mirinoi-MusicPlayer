@@ -31,6 +31,13 @@ class AudioPlayer:
 
         self.on_finished = None
 
+        self._volume = 20
+        try:
+            self.player.audio_set_volume(self._volume)
+        except Exception:
+            pass
+
+
     def play(self, video_url: str):
         with self._lock:
             if self.state == PlayerState.PAUSED and self.current_url == video_url:
@@ -88,6 +95,11 @@ class AudioPlayer:
             media = self.instance.media_new(audio_url)
             self.player.set_media(media)
             self.player.play()
+
+            try:
+                self.player.audio_set_volume(self._volume)
+            except Exception:
+                pass
 
             timeout = time.time() + 5
             while time.time() < timeout:
@@ -180,3 +192,22 @@ class AudioPlayer:
             text=True
         )
         return result.strip().split("\n")[0]
+
+    def set_volume(self, volume: int):
+        v = max(0, min(100, int(volume)))
+        with self._lock:
+            self._volume = v
+            try:
+                self.player.audio_set_volume(v)
+            except Exception:
+                pass
+
+    def get_volume(self) -> int:
+        with self._lock:
+            try:
+                v = self.player.audio_get_volume()
+                if isinstance(v, int) and 0 <= v <= 100:
+                    self._volume = v
+            except Exception:
+                pass
+            return self._volume

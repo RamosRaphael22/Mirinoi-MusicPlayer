@@ -63,7 +63,9 @@ class MainWindow(ctk.CTk):
             on_next=self._play_next,
             on_prev=self._play_prev,
             on_shuffle=self._toggle_shuffle,
-            on_loop=self._toggle_loop
+            on_loop=self._toggle_loop,
+            on_volume_change=self._on_volume_change,
+            initial_volume=self.audio_player.get_volume()
         )
 
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
@@ -186,3 +188,6 @@ class MainWindow(ctk.CTk):
 
         self.audio_player.play(track.url)
         self.controls.set_playing(True)
+
+    def _on_volume_change(self, value):
+        self.audio_player.set_volume(int(value))

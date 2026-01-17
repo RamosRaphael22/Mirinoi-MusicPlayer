@@ -8,7 +8,9 @@ class PlayerControls(ctk.CTkFrame):
         on_next=None,
         on_prev=None,
         on_shuffle=None,
-        on_loop=None
+        on_loop=None,
+        on_volume_change=None,
+        initial_volume=20
     ):
         super().__init__(parent, height=80)
 
@@ -17,11 +19,16 @@ class PlayerControls(ctk.CTkFrame):
         self.on_prev = on_prev
         self.on_shuffle = on_shuffle
         self.on_loop = on_loop
+        self.on_volume_change = on_volume_change
+
+        self.initial_volume = initial_volume
 
         self._default_shuffle_color = "#db03fc"
         self._default_loop_color = "#db03fc"
 
         self._build_ui()
+
+        self.volume_slider.set(self.initial_volume)
 
     def _build_ui(self):
         self.prev_btn = ctk.CTkButton(self, text="⏮", command=self.on_prev,
@@ -51,11 +58,14 @@ class PlayerControls(ctk.CTkFrame):
             hover_color="#bb16ca"
         )
 
+        self.volume_slider = ctk.CTkSlider(self, from_=0, to=100, width=150,number_of_steps=100, command=self.on_volume_change)
+
         self.prev_btn.pack(side="left", padx=5)
         self.play_pause_btn.pack(side="left", padx=5)
         self.next_btn.pack(side="left", padx=5)
         self.shuffle_btn.pack(side="left", padx=5)
         self.loop_btn.pack(side="left", padx=5)
+        self.volume_slider.pack(side="left", padx=5)
 
     def set_playing(self, is_playing: bool):
         self.play_pause_btn.configure(text="⏸" if is_playing else "▶")
