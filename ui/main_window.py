@@ -206,6 +206,9 @@ class MainWindow(ctk.CTk):
             return
 
         self.audio_player.play(track.url)
+        if self.queue_manager.current_index is not None:
+            self.track_list.set_highlight(self.queue_manager.current_index)
+
         self.controls.set_playing(True)
 
     def _on_volume_change(self, value):
