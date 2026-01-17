@@ -10,7 +10,8 @@ class PlayerControls(ctk.CTkFrame):
         on_shuffle=None,
         on_loop=None,
         on_volume_change=None,
-        initial_volume=20
+        initial_volume=20,
+        on_seek=None
     ):
         super().__init__(parent, height=80)
 
@@ -20,6 +21,7 @@ class PlayerControls(ctk.CTkFrame):
         self.on_shuffle = on_shuffle
         self.on_loop = on_loop
         self.on_volume_change = on_volume_change
+        self.on_seek = on_seek
 
         self.initial_volume = initial_volume
 
@@ -60,8 +62,21 @@ class PlayerControls(ctk.CTkFrame):
 
         self.volume_slider = ctk.CTkSlider(self, from_=0, to=100, width=150,number_of_steps=100, command=self.on_volume_change)
 
-        self.playback_progress_bar = ctk.CTkProgressBar(self, width=200)
-        self.playback_progress_bar.set(0)
+        self.playback_seek_slider = ctk.CTkSlider(
+            self,
+            from_=0,
+            to=1,
+            width=400,
+            number_of_steps=1000,
+            command=self._on_seek_slider_change
+        )
+        self.playback_seek_slider.set(0)
+
+        self._is_user_seeking = False
+        self._last_seek_ratio = 0.0
+
+        self.playback_seek_slider.bind("<ButtonPress-1>", self._on_seek_start)
+        self.playback_seek_slider.bind("<ButtonRelease-1>", self._on_seek_end)
 
         self.playback_time_label = ctk.CTkLabel(self, text="0:00 / 0:00")
 
@@ -70,7 +85,7 @@ class PlayerControls(ctk.CTkFrame):
         self.next_btn.pack(side="left", padx=5)
         self.shuffle_btn.pack(side="left", padx=5)
         self.loop_btn.pack(side="left", padx=5)
-        self.playback_progress_bar.pack(side="left", padx=5)
+        self.playback_seek_slider.pack(side="left", padx=5)
         self.playback_time_label.pack(side="left", padx=5)
         self.volume_slider.pack(side="left", padx=15)
 
@@ -89,11 +104,12 @@ class PlayerControls(ctk.CTkFrame):
 
     def update_playback_progress(self, progress_ratio: float, current_time_ms: int, track_duration_ms: int):
         progress_ratio = max(0.0, min(1.0, float(progress_ratio)))
-        self.playback_progress_bar.set(progress_ratio)
+
+        if not self._is_user_seeking:
+            self.playback_seek_slider.set(progress_ratio)
 
         formatted_current = self._format_milliseconds_to_time(current_time_ms)
         formatted_total = self._format_milliseconds_to_time(track_duration_ms)
-
         self.playback_time_label.configure(text=f"{formatted_current} / {formatted_total}")
 
     def _format_milliseconds_to_time(self, milliseconds: int) -> str:
@@ -101,4 +117,16 @@ class PlayerControls(ctk.CTkFrame):
         minutes = total_seconds // 60
         seconds = total_seconds % 60
         return f"{minutes}:{seconds:02d}"
+
+    def _on_seek_start(self, _event):
+        self._is_user_seeking = True
+
+    def _on_seek_end(self, _event):
+        self._is_user_seeking = False
+        if self.on_seek is not None:
+            self.on_seek(self._last_seek_ratio)
+
+    def _on_seek_slider_change(self, value):
+        ratio = max(0.0, min(1.0, float(value)))
+        self._last_seek_ratio = ratio
 

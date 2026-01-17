@@ -251,4 +251,37 @@ class AudioPlayer:
         if progress_ratio > 1:
             return 1.0
         return progress_ratio
+    
+    def seek_to_time_ms(self, target_time_ms: int):
+        with self._lock:
+            if self.state not in (PlayerState.PLAYING, PlayerState.PAUSED):
+                return
 
+            try:
+                duration_ms = self.player.get_length()
+                if duration_ms is not None and duration_ms > 0:
+                    clamped = max(0, min(int(target_time_ms), int(duration_ms)))
+                else:
+                    clamped = max(0, int(target_time_ms))
+
+                self.player.set_time(clamped)
+            except Exception:
+                pass
+
+
+    def seek_to_progress_ratio(self, progress_ratio: float):
+        progress_ratio = max(0.0, min(1.0, float(progress_ratio)))
+
+        with self._lock:
+            if self.state not in (PlayerState.PLAYING, PlayerState.PAUSED):
+                return
+
+            try:
+                duration_ms = self.player.get_length()
+                if duration_ms is None or duration_ms <= 0:
+                    return
+
+                target_time_ms = int(duration_ms * progress_ratio)
+                self.player.set_time(target_time_ms)
+            except Exception:
+                pass

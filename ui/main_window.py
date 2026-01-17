@@ -68,7 +68,8 @@ class MainWindow(ctk.CTk):
             on_shuffle=self._toggle_shuffle,
             on_loop=self._toggle_loop,
             on_volume_change=self._on_volume_change,
-            initial_volume=self.audio_player.get_volume()
+            initial_volume=self.audio_player.get_volume(),
+            on_seek=self._on_seek_requested
         )
 
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
@@ -226,3 +227,5 @@ class MainWindow(ctk.CTk):
 
         self._playback_progress_update_job = self.after(200, self._update_playback_progress_ui)
 
+    def _on_seek_requested(self, progress_ratio: float):
+        self.audio_player.seek_to_progress_ratio(progress_ratio)
