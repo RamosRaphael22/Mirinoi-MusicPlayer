@@ -1,8 +1,8 @@
 # 🎵 Mirinoi Player
 
-**Mirinoi** is a desktop music player built **100% in Python**, featuring a modern graphical interface using **CustomTkinter** and focused on **YouTube playlist streaming**, queue management, shuffle, loop, and accurate playback control using **VLC**.
+**Mirinoi** is a desktop music player built **100% in Python**, featuring a modern graphical interface using **CustomTkinter** and focused on **YouTube playlist streaming**, queue management, and accurate real-time playback control using **VLC**.
 
-The project emphasizes clean architecture, separation of concerns, and real-time audio control without blocking the UI.
+The project emphasizes clean architecture, separation of concerns, and responsive UI design.
 
 ---
 
@@ -10,21 +10,29 @@ The project emphasizes clean architecture, separation of concerns, and real-time
 
 ✔ Modern graphical interface (CustomTkinter)
 
-✔ YouTube Music playlist loading
+✔ YouTube playlist loading
 
 ✔ Background playlist loading (non-blocking UI)
 
 ✔ Queue control (next / previous)
 
-✔ Shuffle while preserving the current track
+✔ Shuffle with order restoration
 
-✔ Loop playlist when finished (optional)
+✔ Playlist loop mode (optional)
 
 ✔ Visual highlight of the currently playing track
 
 ✔ Unified **Play / Pause** button
 
 ✔ **Real pause & resume** (continues from the exact position)
+
+✔ **Playback progress bar** (real-time)
+
+✔ **Current time / total duration display**
+
+✔ **Seek support** (jump to a specific point in the track)
+
+✔ **Volume control slider**
 
 ✔ VLC-based audio playback
 
@@ -74,8 +82,8 @@ Mirinoi/
 6. The user selects a track
 7. **yt-dlp** generates a direct audio stream URL
 8. **VLC** streams the audio
-9. `QueueManager` controls navigation, shuffle, and loop
-10. `AudioPlayer` manages playback state and lifecycle
+9. `QueueManager` controls navigation, shuffle, and loop behavior
+10. `AudioPlayer` manages playback lifecycle, state, volume, seek, and progress tracking
 
 ---
 
@@ -83,15 +91,17 @@ Mirinoi/
 
 ### 🎨 CustomTkinter
 
-Chosen for its modern look, theming support, and better UX compared to standard Tkinter.
+Chosen for its modern appearance, theming support, and improved UX compared to standard Tkinter.
 
 ### 🎧 VLC + python-vlc
 
-Used instead of `ffplay` to support:
+Used to support:
 
 * real pause / resume
+* seek support
 * playback state inspection
-* better control over streaming behavior
+* volume control
+* accurate playback timing
 
 The playback state machine (`STOPPED / PLAYING / PAUSED`) lives **exclusively** inside `AudioPlayer`.
 
@@ -105,13 +115,13 @@ All blocking operations (yt-dlp execution and VLC startup) run in background thr
 
 ### 🗂 CSV Storage
 
-A simple, portable solution for playlist persistence, easily replaceable by a database in the future.
+A simple and portable solution for playlist persistence, easily replaceable by a database in the future.
 
 ### 🧱 Layered Architecture
 
-* UI layer never spawns subprocesses
-* Core layer encapsulates playback, queues, and external tools
-* Clear responsibility boundaries between modules
+* UI layer never interacts directly with VLC or subprocesses
+* Core layer encapsulates playback logic, queue management, and external tools
+* Clear separation of responsibilities between modules
 
 ---
 
@@ -130,8 +140,6 @@ A simple, portable solution for playlist persistence, easily replaceable by a da
 
 ### Python Dependencies
 
-Install the required Python packages:
-
 ```bash
 pip install customtkinter yt-dlp python-vlc
 ```
@@ -140,59 +148,47 @@ pip install customtkinter yt-dlp python-vlc
 
 ### System Requirements
 
-The application relies on the following external tools:
-
 #### 🔹 VLC Media Player (required)
 
 VLC is used as the **audio playback engine**, providing:
 
-* Native streaming support
-* Real pause / resume functionality
-* Reliable playback state detection
+* native streaming support
+* real pause / resume
+* seek and volume control
+* reliable playback state detection
 
-⚠️ VLC must be installed on the system.
-The VLC executable **does not need** to be available in `PATH`, but it is recommended.
-
-Download (official site):
+Download:
 [https://www.videolan.org/vlc/](https://www.videolan.org/vlc/)
 
 ---
 
 #### 🔹 yt-dlp (required, must be in PATH)
 
-`yt-dlp` is used to:
+Used to:
 
-* Fetch playlist metadata
-* Generate direct audio streaming URLs from YouTube
-
-Installation options:
-
-Option 1 — via pip (recommended for Python users):
-pip install yt-dlp
-
-Option 2 — standalone binary (recommended for non-Python users):
-Download from the official GitHub releases page and add it to PATH:
-[https://github.com/yt-dlp/yt-dlp/releases](https://github.com/yt-dlp/yt-dlp/releases)
+* fetch playlist metadata
+* generate direct audio streaming URLs
 
 Verify installation:
+
+```bash
 yt-dlp --version
+```
 
 ---
 
 #### 🔹 FFmpeg (optional but recommended)
 
-FFmpeg is **not required by VLC**, as VLC ships with its own internal decoding libraries.
+Recommended for:
 
-However, FFmpeg is **recommended** because:
+* yt-dlp fallback scenarios
+* improved compatibility with edge-case formats
 
-* `yt-dlp` may rely on FFmpeg in fallback scenarios
-* Some formats and edge cases require FFmpeg for best compatibility
+Verify installation:
 
-Download (official site):
-[https://ffmpeg.org/download.html](https://ffmpeg.org/download.html)
-
-After installation, ensure it is available in PATH:
+```bash
 ffmpeg -version
+```
 
 ---
 
@@ -209,14 +205,6 @@ ffmpeg -version
 
 ---
 
-### ⚠️ Important Notes
-
-* VLC **does not depend on FFmpeg being installed system-wide**
-* FFmpeg is only required for `yt-dlp` in specific scenarios
-* All blocking operations run in background threads to keep the UI responsive
-
----
-
 ## ▶️ How to Run
 
 From the project root:
@@ -229,8 +217,6 @@ python app.py
 
 ## 📄 Playlists (CSV)
 
-The `playlists.csv` file format:
-
 ```csv
 name,url
 My Playlist,https://www.youtube.com/playlist?list=XXXX
@@ -242,8 +228,11 @@ My Playlist,https://www.youtube.com/playlist?list=XXXX
 
 * Clicking a song starts playback
 * The current track is visually highlighted
-* **Play/Pause is a single toggle button**
-* Pause resumes from the exact position
+* Play/Pause is a single toggle button
+* Playback resumes from the exact paused position
+* Seek allows jumping to any point in the track
+* Progress bar updates in real time
+* Volume can be adjusted during playback
 * When a track ends, the next one plays automatically
 * Shuffle preserves the current track
 * Loop restarts the playlist when enabled
@@ -261,11 +250,10 @@ My Playlist,https://www.youtube.com/playlist?list=XXXX
 ## 🛠 Planned Improvements
 
 1. Dependency installation script (Windows / Linux)
-2. Better error feedback in the UI
-3. Playback progress bar
-4. Volume control
-5. Keyboard shortcuts
-6. Packaging as a standalone executable
+2. Improved error feedback in the UI
+3. Keyboard shortcuts
+4. Persist user settings (volume, last playlist)
+5. Packaging as a standalone executable
 
 ---
 
