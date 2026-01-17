@@ -1,0 +1,25 @@
+# Backgrounds
+BG = "#0B0B0F"
+SURFACE = "#14141B"
+SURFACE_2 = "#1B1B24"
+SURFACE_HOVER = "#232332"
+STROKE = "#2A2A35"
+
+# Footer
+FOOTER = "#0F0F15"
+
+# Text
+TEXT = "#EDEDF2"
+TEXT_MUTED = "#A1A1B3"
+TEXT_ON_ACCENT = "white"
+
+# Accent
+ACCENT = "#DB03FC"
+ACCENT_HOVER = "#BB16CA"
+
+# Buttons
+BTN = SURFACE_2
+HOVER = SURFACE_HOVER
+
+# Danger (for destructive actions)
+DANGER_HOVER = "#3A1B1B"

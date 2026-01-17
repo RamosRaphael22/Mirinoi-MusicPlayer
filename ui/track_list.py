@@ -1,4 +1,5 @@
 import customtkinter as ctk
+from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, TEXT_MUTED
 
 # UI component to display and manage the list of tracks
 # Allows track selection and highlights the selected track
@@ -8,6 +9,8 @@ import customtkinter as ctk
 class TrackList(ctk.CTkFrame):
     def __init__(self, parent, on_track_selected=None):
         super().__init__(parent)
+
+        self.configure(fg_color=SURFACE)
 
         self.on_track_selected = on_track_selected
 
@@ -23,11 +26,13 @@ class TrackList(ctk.CTkFrame):
         self.title = ctk.CTkLabel(
             self,
             text="Músicas",
-            font=ctk.CTkFont(size=16, weight="bold")
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color=TEXT
         )
+
         self.title.pack(pady=10)
 
-        self.scroll = ctk.CTkScrollableFrame(self)
+        self.scroll = ctk.CTkScrollableFrame(self, fg_color="transparent")
         self.scroll.pack(fill="both", expand=True, padx=10, pady=5)
 
     def show_loading(self):
@@ -43,7 +48,8 @@ class TrackList(ctk.CTkFrame):
         label = ctk.CTkLabel(
             self.scroll,
             text="Carregando músicas...",
-            font=ctk.CTkFont(size=14, weight="bold")
+            font=ctk.CTkFont(size=14, weight="bold"),
+            text_color=TEXT_MUTED
         )
         label.pack(pady=20)
 
@@ -69,8 +75,11 @@ class TrackList(ctk.CTkFrame):
                 text=text,
                 anchor="w",
                 command=lambda i=index: self._select_track(i),
-                fg_color="#db03fc",
-                hover_color="#bb16ca"
+                fg_color=SURFACE_2,
+                hover_color=SURFACE_HOVER,
+                text_color=TEXT,
+                border_width=1,
+                border_color=STROKE
             )
 
             if self.default_fg_color is None:
@@ -90,18 +99,19 @@ class TrackList(ctk.CTkFrame):
         self.highlighted_index = index
         self.selected_index = index
 
-        highlight_color = ("#db03fc", "#bb16ca")
-
         for i, btn in enumerate(self.track_buttons):
             if i == index:
                 btn.configure(
-                    fg_color=highlight_color,
-                    hover_color=highlight_color,
-                    text_color="white"
+                    fg_color=ACCENT,
+                    hover_color=ACCENT_HOVER,
+                    text_color=TEXT,
+                    border_width=0
                 )
             else:
                 btn.configure(
-                    fg_color=self.default_fg_color,
-                    hover_color=self.default_fg_color,
-                    text_color="white"
+                    fg_color=SURFACE_2,
+                    hover_color=SURFACE_HOVER,
+                    text_color=TEXT,
+                    border_width=1,
+                    border_color=STROKE
                 )

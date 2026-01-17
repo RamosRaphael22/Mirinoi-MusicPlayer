@@ -9,6 +9,7 @@ from core.queue_manager import QueueManager
 from ui.playlist_sidebar import PlaylistSidebar
 from ui.track_list import TrackList
 from ui.player_controls import PlayerControls
+from ui.theme import BG
 
 # Main application window
 # Integrates playlist sidebar, track list, and player controls
@@ -20,6 +21,7 @@ from ui.player_controls import PlayerControls
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.configure(fg_color=BG)
 
         self.shuffle_enabled = False
         self.loop_enabled = False
@@ -211,7 +213,6 @@ class MainWindow(ctk.CTk):
 
     def _schedule_playback_progress_updates(self):
         self._update_playback_progress_ui()
-
 
     def _update_playback_progress_ui(self):
         if self.audio_player.state in (PlayerState.PLAYING, PlayerState.PAUSED):

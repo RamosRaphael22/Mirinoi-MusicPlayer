@@ -1,6 +1,7 @@
 import customtkinter as ctk
 from tkinter import messagebox
 from ui.playlist_modal import PlaylistModal  
+from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, DANGER_HOVER
 
 # Sidebar UI component for managing playlists
 # Displays list of playlists from CSV service
@@ -10,6 +11,9 @@ from ui.playlist_modal import PlaylistModal
 class PlaylistSidebar(ctk.CTkFrame):
     def __init__(self, parent, csv_service, on_select_callback=None, on_remove_callback=None):
         super().__init__(parent, width=220)
+
+        self.configure(fg_color=SURFACE)
+
         self.csv_service = csv_service
         self.on_select_callback = on_select_callback
         self.on_remove_callback = on_remove_callback
@@ -24,28 +28,35 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.title = ctk.CTkLabel(
             self,
             text="Playlists",
-            font=ctk.CTkFont(size=16, weight="bold")
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color="#EDEDF2"
         )
         self.title.pack(pady=10)
 
-        self.scroll = ctk.CTkScrollableFrame(self, height=400)
-        self.scroll.pack(fill="both", expand=True, padx=5)
+        self.scroll = ctk.CTkScrollableFrame(self, height=400, fg_color="transparent")
+        self.scroll.pack(fill="both", expand=True, padx=10)
 
         self.btn_add = ctk.CTkButton(
             self,
             text="➕ Adicionar",
             command=self._add_playlist_dialog,
-            hover_color="#3a8d02",
-            fg_color="#db03fc",
+            fg_color=SURFACE_2,
+            hover_color=SURFACE_HOVER,
+            text_color=TEXT,
+            border_width=1,
+            border_color=STROKE
         )
         self.btn_add.pack(fill="x", padx=10, pady=(5, 2))
 
         self.btn_remove = ctk.CTkButton(
             self,
             text="❌ Remover",
-            hover_color="#a00000",
             command=self._remove_selected_playlist,
-            fg_color="#7f0092"
+            fg_color=SURFACE_2,
+            hover_color=DANGER_HOVER,
+            text_color=TEXT,
+            border_width=1,
+            border_color=STROKE
         )
         self.btn_remove.pack(fill="x", padx=10, pady=(2, 10))
 
@@ -63,8 +74,11 @@ class PlaylistSidebar(ctk.CTkFrame):
                 text=playlist.name,
                 anchor="w",
                 command=lambda p=playlist: self._select_playlist(p),
-                fg_color="#db03fc",
-                hover_color="#bb16ca"
+                fg_color=SURFACE_2,
+                hover_color=SURFACE_HOVER,
+                text_color=TEXT,
+                border_width=1,
+                border_color=STROKE
             )
             btn.pack(fill="x", pady=2, padx=5)
 
@@ -74,8 +88,21 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.selected_playlist_id = playlist.id
 
         for pid, btn in self.playlist_buttons.items():
-            btn.configure(fg_color="#bb16ca" if pid == playlist.id else "#db03fc")
-
+            if pid == playlist.id:
+                btn.configure(
+                    fg_color=ACCENT,
+                    hover_color=ACCENT_HOVER,
+                    text_color="white",
+                    border_width=0
+                )
+            else:
+                btn.configure(
+                    fg_color=SURFACE_2,
+                    hover_color=SURFACE_HOVER,
+                    text_color=TEXT,
+                    border_width=1,
+                    border_color=STROKE
+                )
 
         if self.on_select_callback:
             self.on_select_callback(playlist)
