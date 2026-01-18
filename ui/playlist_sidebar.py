@@ -45,7 +45,6 @@ class PlaylistSidebar(ctk.CTkFrame):
         )
         self.title.pack(pady=(10, 6))
 
-        # Search bar
         self.search_entry = ctk.CTkEntry(
             self,
             textvariable=self.search_var,
@@ -120,7 +119,6 @@ class PlaylistSidebar(ctk.CTkFrame):
             btn.pack(fill="x", pady=2, padx=5)
             self.playlist_buttons[playlist.id] = btn
 
-        # Reaplica highlight na playlist selecionada (se ela ainda estiver visível)
         if self.selected_playlist_id and self.selected_playlist_id in self.playlist_buttons:
             btn = self.playlist_buttons[self.selected_playlist_id]
             btn.configure(

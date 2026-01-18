@@ -43,8 +43,7 @@ class TrackList(ctk.CTkFrame):
             text_color=TEXT
         )
         self.title.pack(pady=(10, 6))
-
-        # Search bar
+        
         self.search_entry = ctk.CTkEntry(
             self,
             textvariable=self.search_var,
@@ -66,7 +65,7 @@ class TrackList(ctk.CTkFrame):
         self.selected_index = None
         self.highlighted_index = None
 
-        self.search_var.set("")  # limpa busca ao carregar
+        self.search_var.set("")  
 
         for widget in self.scroll.winfo_children():
             widget.destroy()
@@ -84,7 +83,7 @@ class TrackList(ctk.CTkFrame):
 
     def load_tracks(self, tracks):
         self._all_tracks = tracks or []
-        self.search_var.set("")  # opcional: reset ao trocar playlist
+        self.search_var.set("")  
         self._apply_track_filter()
 
     def _apply_track_filter(self):
