@@ -21,6 +21,8 @@ from ui.theme import BG
 class MainWindow(ctk.CTk):
     def __init__(self):
         super().__init__()
+        self.minsize(1350, 650)
+
         self.configure(fg_color=BG)
 
         self.shuffle_enabled = False
