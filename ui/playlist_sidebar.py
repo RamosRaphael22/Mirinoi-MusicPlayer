@@ -48,19 +48,41 @@ class PlaylistSidebar(ctk.CTkFrame):
         )
         self.title.pack(pady=(10, 6))
 
+        self.search_row = ctk.CTkFrame(self, fg_color="transparent")
+        self.search_row.pack(fill="x", padx=10, pady=(0, 8))
+
         self.search_entry = ctk.CTkEntry(
-            self,
+            self.search_row,
             textvariable=self.search_var,
             fg_color=SURFACE_3,
             text_color=TEXT,
             border_width=1,
-            border_color=STROKE
+            border_color=STROKE,
+            width=170
         )
-        self.search_entry.pack(fill="x", padx=10, pady=(0, 8))
+        self.search_entry.pack(side="left", fill="x", expand=True)
+
         self.search_entry.bind("<FocusIn>", lambda e: self._clear_placeholder())
         self.search_entry.bind("<FocusOut>", lambda e: self._apply_placeholder())
+        self.search_entry.bind("<KeyPress>", lambda e: self._clear_placeholder())
         self._apply_placeholder()
-        self.search_var.trace_add("write", lambda *_: self._apply_playlist_filter())
+
+        self.clear_btn = ctk.CTkButton(
+            self.search_row,
+            text="x",
+            width=34,
+            height=28,
+            fg_color=SURFACE_3,
+            hover_color=SURFACE_HOVER,
+            text_color=TEXT_MUTED,
+            border_width=1,
+            border_color=STROKE,
+            command=self._clear_search
+        )
+        self.clear_btn.pack(side="left", padx=(6, 0), pady=(2, 0))
+
+        self.search_var.trace_add("write", lambda *_: (self._apply_playlist_filter(), self._update_clear_button()))
+        self._update_clear_button()
 
         self.scroll = ctk.CTkScrollableFrame(self, height=400, fg_color="transparent")
         self.scroll.pack(fill="both", expand=True, padx=10)
@@ -91,6 +113,9 @@ class PlaylistSidebar(ctk.CTkFrame):
 
     def _apply_placeholder(self):
         if self.search_var.get().strip():
+            return
+
+        if self.focus_get() == self.search_entry:
             return
 
         self._placeholder_active = True
@@ -207,3 +232,19 @@ class PlaylistSidebar(ctk.CTkFrame):
 
             if self.on_remove_callback:
                 self.on_remove_callback(removed_id)
+
+    def _clear_search(self):
+        self.search_var.set("")
+        self._clear_placeholder()
+        self._apply_playlist_filter() 
+        self._update_clear_button()
+        self._apply_placeholder()
+
+
+    def _update_clear_button(self):    
+        raw = self.search_var.get()
+
+        if self._placeholder_active or not raw.strip() or raw == self._placeholder_text:
+            self.clear_btn.configure(state="disabled", text_color=TEXT_MUTED)
+        else:
+            self.clear_btn.configure(state="normal", text_color=TEXT)
