@@ -62,7 +62,8 @@ Mirinoi/
 │   ├── main_window.py
 │   ├── playlist_sidebar.py
 │   ├── track_list.py
-│   └── player_controls.py
+│   ├── player_controls.py
+│   └── theme.py
 │
 ├── utils/
 │   └── validators.py
