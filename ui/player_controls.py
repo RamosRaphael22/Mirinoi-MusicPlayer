@@ -78,11 +78,11 @@ class PlayerControls(ctk.CTkFrame):
 
         self.playback_time_label = ctk.CTkLabel(self, text="0:00 / 0:00", text_color=TEXT_MUTED)
 
-        self.prev_btn.pack(side="left", padx=5)
-        self.play_pause_btn.pack(side="left", padx=5)
-        self.next_btn.pack(side="left", padx=5)
-        self.shuffle_btn.pack(side="left", padx=5)
-        self.loop_btn.pack(side="left", padx=5)
+        self.prev_btn.pack(side="left", padx=5, pady=10)
+        self.play_pause_btn.pack(side="left", padx=5, pady=10)
+        self.next_btn.pack(side="left", padx=5, pady=10)
+        self.shuffle_btn.pack(side="left", padx=5, pady=10)
+        self.loop_btn.pack(side="left", padx=5, pady=10)
         self.playback_seek_slider.pack(side="left", padx=(10, 5))
         self.playback_time_label.pack(side="left", padx=(8, 15))
         self.volume_slider.pack(side="left", padx=(10, 15))
