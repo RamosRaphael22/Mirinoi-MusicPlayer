@@ -259,5 +259,15 @@ If `playlists.csv` does not exist, the application will create it automatically.
 ## 👨‍💻 Author
 
 Project developed by **Raphael Ramos Cavalcante**
+
 Degree: Systems Analysis and Development
+
 Main language: Python 🐍
+
+---
+
+## 🧠 Important Note
+
+This project is **educational and experimental**.
+
+Use public playlists and respect YouTube’s terms of service.
