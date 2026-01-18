@@ -3,6 +3,7 @@ import subprocess
 import time
 from enum import Enum
 import vlc
+from yt_dlp import YoutubeDL
 
 class PlayerState(Enum):
     STOPPED = "stopped"
@@ -191,12 +192,33 @@ class AudioPlayer:
             self._last_known_track_duration_ms = 0
 
     def _get_audio_stream_url(self, video_url: str) -> str:
-        result = subprocess.check_output(
-            ["yt-dlp", "-f", "bestaudio", "-g", video_url],
-            stderr=subprocess.DEVNULL,
-            text=True
-        )
-        return result.strip().split("\n")[0]
+        ydl_opts = {
+            "format": "bestaudio/best",
+            "quiet": True,
+            "no_warnings": True,
+            "noplaylist": True,
+            "skip_download": True,
+        }
+
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(video_url, download=False)
+
+        direct = info.get("url")
+        if isinstance(direct, str) and direct.strip():
+            return direct.strip()
+
+        formats = info.get("formats") or []
+        if not formats:
+            raise RuntimeError("yt_dlp: no formats available")
+
+        audio_formats = [f for f in formats if f.get("acodec") not in (None, "none")]
+        best = audio_formats[-1] if audio_formats else formats[-1]
+
+        u = best.get("url")
+        if not u:
+            raise RuntimeError("yt_dlp: could not extract stream url")
+
+        return str(u).strip()
 
     def set_volume(self, volume: int):
         v = max(0, min(100, int(volume)))

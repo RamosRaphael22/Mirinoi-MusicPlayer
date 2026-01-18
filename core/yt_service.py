@@ -1,95 +1,91 @@
-import subprocess
-import json
-from typing import List, Dict
+from typing import List, Optional
+from yt_dlp import YoutubeDL
+
 from models.track import Track
 
-# Service to interact with YouTube using yt-dlp
+
+# Service to interact with YouTube using yt-dlp (Python lib)
 # Fetches tracks from a YouTube playlist URL
 # Searches for the first track matching a query
-# Uses yt-dlp commands to retrieve data in JSON format
-# Parses JSON to create Track objects
+# Parses extracted info to create Track objects
 # Handles errors gracefully, returning None or empty lists as needed
-# Provides methods to get tracks from a playlist and search for a track
 class YouTubeService:
     def __init__(self):
-        self.ytdlp_cmd = "yt-dlp"
+        self._base_opts = {
+            "quiet": True,
+            "no_warnings": True,
+            "skip_download": True,
+        }
 
     def get_tracks_from_playlist(self, playlist_url: str) -> List[Track]:
-        command = [
-            self.ytdlp_cmd,
-            "--flat-playlist",
-            "--dump-json",
-            playlist_url
-        ]
+        ydl_opts = {
+            **self._base_opts,
+            "extract_flat": True,
+            "noplaylist": False,
+        }
 
         try:
-            process = subprocess.Popen(
-                command,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
-                text=True,
-                encoding="utf-8"
-            )
+            with YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(playlist_url, download=False)
 
-            tracks = []
+            entries = info.get("entries") or []
+            tracks: List[Track] = []
 
-            for line in process.stdout:
-                try:
-                    data = json.loads(line)
-                    if not data.get("title") or not data.get("id"):
-                        continue
-
-                    artist = (
-                        data.get("artist")
-                        or data.get("uploader")
-                        or data.get("channel")
-                    )
-
-                    track = Track(
-                        title=data.get("title"),
-                        artist=artist,
-                        url=f"https://music.youtube.com/watch?v={data.get('id')}"
-                    )
-                    tracks.append(track)
-
-                except json.JSONDecodeError:
+            for e in entries:
+                if not isinstance(e, dict):
                     continue
 
-            process.wait()
+                title = e.get("title")
+                video_id = e.get("id")
+                if not title or not video_id:
+                    continue
+
+                artist = e.get("artist") or e.get("uploader") or e.get("channel")
+
+                tracks.append(
+                    Track(
+                        title=title,
+                        artist=artist,
+                        url=f"https://music.youtube.com/watch?v={video_id}",
+                    )
+                )
+
             return tracks
 
-        except FileNotFoundError:
-            raise RuntimeError("yt-dlp não encontrado no PATH")
+        except Exception:
+            return []
 
-    def search_first(self, query: str) -> Track | None:
-        command = [
-            self.ytdlp_cmd,
-            "--dump-json",
-            f"ytsearch1:{query}"
-        ]
+    def search_first(self, query: str) -> Optional[Track]:
+        ydl_opts = {
+            **self._base_opts,
+            "noplaylist": True,
+            "default_search": "ytsearch1",
+            "extract_flat": False,
+        }
 
         try:
-            output = subprocess.check_output(
-                command,
-                stderr=subprocess.DEVNULL,
-                text=True,
-                encoding="utf-8"
-            )
+            with YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(f"ytsearch1:{query}", download=False)
 
-            data = json.loads(output)
-            if not data.get("title") or not data.get("id"):
+            entries = info.get("entries") if isinstance(info, dict) else None
+            if not entries:
                 return None
 
-            artist = (
-                data.get("artist")
-                or data.get("uploader")
-                or data.get("channel")
-            )
+            data = entries[0]
+            if not isinstance(data, dict):
+                return None
+
+            title = data.get("title")
+            video_id = data.get("id")
+            if not title or not video_id:
+                return None
+
+            artist = data.get("artist") or data.get("uploader") or data.get("channel")
 
             return Track(
-                title=data.get("title"),
+                title=title,
                 artist=artist,
-                url=f"https://music.youtube.com/watch?v={data.get('id')}"
+                url=f"https://music.youtube.com/watch?v={video_id}",
             )
 
         except Exception:
