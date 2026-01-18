@@ -2,7 +2,7 @@ import unicodedata
 import customtkinter as ctk
 from tkinter import messagebox
 from ui.playlist_modal import PlaylistModal
-from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, DANGER_HOVER
+from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, DANGER_HOVER, TEXT_MUTED, SURFACE_3
 
 
 # Sidebar UI component for managing playlists
@@ -27,6 +27,9 @@ class PlaylistSidebar(ctk.CTkFrame):
 
         self.search_var = ctk.StringVar()
 
+        self._placeholder_text = "Pesquisar playlists..."
+        self._placeholder_active = False
+
         self._build_ui()
         self._load_playlists()
 
@@ -48,13 +51,15 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.search_entry = ctk.CTkEntry(
             self,
             textvariable=self.search_var,
-            placeholder_text="Pesquisar playlists...",
-            fg_color=SURFACE_2,
+            fg_color=SURFACE_3,
             text_color=TEXT,
             border_width=1,
             border_color=STROKE
         )
         self.search_entry.pack(fill="x", padx=10, pady=(0, 8))
+        self.search_entry.bind("<FocusIn>", lambda e: self._clear_placeholder())
+        self.search_entry.bind("<FocusOut>", lambda e: self._apply_placeholder())
+        self._apply_placeholder()
         self.search_var.trace_add("write", lambda *_: self._apply_playlist_filter())
 
         self.scroll = ctk.CTkScrollableFrame(self, height=400, fg_color="transparent")
@@ -84,12 +89,33 @@ class PlaylistSidebar(ctk.CTkFrame):
         )
         self.btn_remove.pack(fill="x", padx=10, pady=(2, 10))
 
+    def _apply_placeholder(self):
+        if self.search_var.get().strip():
+            return
+
+        self._placeholder_active = True
+        self.search_entry.delete(0, "end")
+        self.search_entry.insert(0, self._placeholder_text)
+        self.search_entry.configure(text_color=TEXT_MUTED)
+
+    def _clear_placeholder(self):
+        if not self._placeholder_active:
+            return
+
+        self._placeholder_active = False
+        self.search_entry.delete(0, "end")
+        self.search_entry.configure(text_color=TEXT)
+
     def _load_playlists(self):
         self._all_playlists = self.csv_service.load_playlists()
         self._apply_playlist_filter()
 
     def _apply_playlist_filter(self):
-        query = self._norm(self.search_var.get())
+        raw = self.search_var.get()
+        if self._placeholder_active or raw == self._placeholder_text:
+            raw = ""
+
+        query = self._norm(raw)
 
         if not query:
             filtered = self._all_playlists
