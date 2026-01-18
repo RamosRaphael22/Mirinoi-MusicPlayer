@@ -21,6 +21,9 @@ The project emphasizes **clean architecture**, separation of concerns, and a res
 * ✅ **Interactive playback progress bar** (**seek support**)
 * ✅ **Current playback time / total duration** display
 * ✅ **Volume control slider** (real-time)
+* ✅ **Search bar for playlists**
+* ✅ **Search bar for tracks**
+* ✅ **Clear search button** (resets filter and restores full list)
 * ✅ VLC-based audio streaming
 * ✅ `.csv` file for playlist persistence
 
@@ -258,11 +261,3 @@ If `playlists.csv` does not exist, the application will create it automatically.
 Project developed by **Raphael Ramos Cavalcante**
 Degree: Systems Analysis and Development
 Main language: Python 🐍
-
----
-
-## 🧠 Important Note
-
-This project is **educational and experimental**.
-
-Use public playlists and respect YouTube’s terms of service.
