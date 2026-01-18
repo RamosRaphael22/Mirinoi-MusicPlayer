@@ -70,27 +70,27 @@ Mirinoi/
 
 ├── app.py
 ├── playlists.csv
-
+│
 ├── core/
 │   ├── audio_player.py
 │   ├── queue_manager.py
 │   ├── csv_service.py
 │   └── yt_service.py
-
+│
 ├── models/
 │   ├── playlist.py
 │   └── track.py
-
+│
 ├── ui/
 │   ├── main_window.py
 │   ├── playlist_sidebar.py
 │   ├── track_list.py
 │   ├── player_controls.py
 │   └── theme.py
-
+│
 ├── utils/
 │   └── validators.py
-
+│
 └── README.md
 
 ---
