@@ -1,7 +1,9 @@
+import unicodedata
 import customtkinter as ctk
 from tkinter import messagebox
-from ui.playlist_modal import PlaylistModal  
+from ui.playlist_modal import PlaylistModal
 from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, DANGER_HOVER
+
 
 # Sidebar UI component for managing playlists
 # Displays list of playlists from CSV service
@@ -21,8 +23,18 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.selected_playlist_id = None
         self.playlist_buttons = {}
 
+        self._all_playlists = []
+
+        self.search_var = ctk.StringVar()
+
         self._build_ui()
         self._load_playlists()
+
+    def _norm(self, s: str) -> str:
+        s = s or ""
+        s = unicodedata.normalize("NFKD", s)
+        s = "".join(ch for ch in s if not unicodedata.combining(ch))
+        return s.lower().strip()
 
     def _build_ui(self):
         self.title = ctk.CTkLabel(
@@ -31,7 +43,20 @@ class PlaylistSidebar(ctk.CTkFrame):
             font=ctk.CTkFont(size=16, weight="bold"),
             text_color=TEXT
         )
-        self.title.pack(pady=10)
+        self.title.pack(pady=(10, 6))
+
+        # Search bar
+        self.search_entry = ctk.CTkEntry(
+            self,
+            textvariable=self.search_var,
+            placeholder_text="Pesquisar playlists...",
+            fg_color=SURFACE_2,
+            text_color=TEXT,
+            border_width=1,
+            border_color=STROKE
+        )
+        self.search_entry.pack(fill="x", padx=10, pady=(0, 8))
+        self.search_var.trace_add("write", lambda *_: self._apply_playlist_filter())
 
         self.scroll = ctk.CTkScrollableFrame(self, height=400, fg_color="transparent")
         self.scroll.pack(fill="both", expand=True, padx=10)
@@ -61,12 +86,24 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.btn_remove.pack(fill="x", padx=10, pady=(2, 10))
 
     def _load_playlists(self):
+        self._all_playlists = self.csv_service.load_playlists()
+        self._apply_playlist_filter()
+
+    def _apply_playlist_filter(self):
+        query = self._norm(self.search_var.get())
+
+        if not query:
+            filtered = self._all_playlists
+        else:
+            filtered = [p for p in self._all_playlists if query in self._norm(p.name)]
+
+        self._render_playlists(filtered)
+
+    def _render_playlists(self, playlists):
         for widget in self.scroll.winfo_children():
             widget.destroy()
 
         self.playlist_buttons.clear()
-
-        playlists = self.csv_service.load_playlists()
 
         for playlist in playlists:
             btn = ctk.CTkButton(
@@ -81,8 +118,17 @@ class PlaylistSidebar(ctk.CTkFrame):
                 border_color=STROKE
             )
             btn.pack(fill="x", pady=2, padx=5)
-
             self.playlist_buttons[playlist.id] = btn
+
+        # Reaplica highlight na playlist selecionada (se ela ainda estiver visível)
+        if self.selected_playlist_id and self.selected_playlist_id in self.playlist_buttons:
+            btn = self.playlist_buttons[self.selected_playlist_id]
+            btn.configure(
+                fg_color=ACCENT,
+                hover_color=ACCENT_HOVER,
+                text_color="white",
+                border_width=0
+            )
 
     def _select_playlist(self, playlist):
         self.selected_playlist_id = playlist.id
@@ -109,7 +155,7 @@ class PlaylistSidebar(ctk.CTkFrame):
 
     def _add_playlist_dialog(self):
         modal = PlaylistModal(self)
-        result = modal.show() 
+        result = modal.show()
 
         if result:
             name, url = result
