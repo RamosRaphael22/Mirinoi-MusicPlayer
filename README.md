@@ -9,19 +9,33 @@ The project emphasizes clean architecture, separation of concerns, and responsiv
 ## 🚀 Features
 
 ✔ Modern graphical interface (CustomTkinter)
+
 ✔ Centralized UI theming system
+
 ✔ YouTube playlist loading
+
 ✔ Background playlist loading (non-blocking UI)
+
 ✔ Queue control (next / previous)
+
 ✔ Shuffle with order restoration
+
 ✔ Playlist loop mode (optional)
+
 ✔ Visual highlight of the currently playing track
+
 ✔ Unified **Play / Pause** button
+
 ✔ **Real pause & resume** (continues from the exact position)
+
 ✔ **Interactive playback progress bar (seek support)**
+
 ✔ **Current playback time / total duration display**
+
 ✔ **Volume control slider (real-time)**
+
 ✔ VLC-based audio playback
+
 ✔ `.csv` file for playlist persistence
 
 ---
