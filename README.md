@@ -9,34 +9,46 @@ The project emphasizes clean architecture, separation of concerns, and responsiv
 ## 🚀 Features
 
 ✔ Modern graphical interface (CustomTkinter)
-
+✔ Centralized UI theming system
 ✔ YouTube playlist loading
-
 ✔ Background playlist loading (non-blocking UI)
-
 ✔ Queue control (next / previous)
-
 ✔ Shuffle with order restoration
-
 ✔ Playlist loop mode (optional)
-
 ✔ Visual highlight of the currently playing track
-
 ✔ Unified **Play / Pause** button
-
 ✔ **Real pause & resume** (continues from the exact position)
-
-✔ **Playback progress bar** (real-time)
-
-✔ **Current time / total duration display**
-
-✔ **Seek support** (jump to a specific point in the track)
-
-✔ **Volume control slider**
-
+✔ **Interactive playback progress bar (seek support)**
+✔ **Current playback time / total duration display**
+✔ **Volume control slider (real-time)**
 ✔ VLC-based audio playback
-
 ✔ `.csv` file for playlist persistence
+
+---
+
+## 🎨 UI Theme System
+
+Mirinoi uses a centralized theme system located at:
+
+```
+ui/theme.py
+```
+
+This file stores all UI colors as **hex variables**, allowing:
+
+* consistent visual identity
+* easy theme adjustments
+* cleaner UI components
+* separation of styling from layout logic
+
+Example responsibilities:
+
+* background colors
+* accent colors
+* text colors
+* hover / active states
+
+UI components import colors directly from `theme.py`, avoiding hardcoded values.
 
 ---
 
@@ -99,7 +111,7 @@ Chosen for its modern appearance, theming support, and improved UX compared to s
 Used to support:
 
 * real pause / resume
-* seek support
+* seek to any playback position
 * playback state inspection
 * volume control
 * accurate playback timing
@@ -231,8 +243,9 @@ My Playlist,https://www.youtube.com/playlist?list=XXXX
 * The current track is visually highlighted
 * Play/Pause is a single toggle button
 * Playback resumes from the exact paused position
-* Seek allows jumping to any point in the track
-* Progress bar updates in real time
+* The progress bar updates in real time
+* Users can **seek freely** by dragging the progress bar
+* Playback time and total duration are displayed
 * Volume can be adjusted during playback
 * When a track ends, the next one plays automatically
 * Shuffle preserves the current track
@@ -250,7 +263,7 @@ My Playlist,https://www.youtube.com/playlist?list=XXXX
 
 ## 🛠 Planned Improvements
 
-1. Dependency installation script (Windows / Linux)
+1. Dependency installation script (Windows)
 2. Improved error feedback in the UI
 3. Keyboard shortcuts
 4. Persist user settings (volume, last playlist)
