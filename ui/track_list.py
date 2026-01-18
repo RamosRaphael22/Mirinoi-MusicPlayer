@@ -27,6 +27,8 @@ class TrackList(ctk.CTkFrame):
 
         self.search_var = ctk.StringVar()
 
+        self._playing_track_url = None
+
         self._build_ui()
 
     def _norm(self, s: str) -> str:
@@ -43,7 +45,7 @@ class TrackList(ctk.CTkFrame):
             text_color=TEXT
         )
         self.title.pack(pady=(10, 6))
-        
+
         self.search_entry = ctk.CTkEntry(
             self,
             textvariable=self.search_var,
@@ -145,6 +147,16 @@ class TrackList(ctk.CTkFrame):
 
             btn.pack(fill="x", pady=2)
             self.track_buttons.append(btn)
+        self._apply_playing_highlight()
+
+    def _apply_playing_highlight(self):
+        if not self._playing_track_url:
+            return
+
+        for i, t in enumerate(self.tracks):
+            if getattr(t, "url", None) == self._playing_track_url:
+                self.set_highlight(i)
+                return
 
     def _select_track(self, index):
         self.selected_index = index
@@ -173,3 +185,7 @@ class TrackList(ctk.CTkFrame):
                     border_width=1,
                     border_color=STROKE
                 )
+
+    def set_playing_track(self, track_url: str | None):
+        self._playing_track_url = track_url
+        self._apply_playing_highlight()

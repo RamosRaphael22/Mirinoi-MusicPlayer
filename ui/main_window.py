@@ -105,7 +105,12 @@ class MainWindow(ctk.CTk):
         self.track_list.load_tracks(tracks)
 
     def _on_track_selected(self, track):
-        self.queue_manager.current_index = self.track_list.selected_index
+        try:
+            idx = next(i for i, t in enumerate(self.queue_manager.queue) if t.url == track.url)
+        except StopIteration:
+            return
+
+        self.queue_manager.current_index = idx
         self._force_play_current()
 
     def _play_current(self):
@@ -126,7 +131,7 @@ class MainWindow(ctk.CTk):
         self.audio_player.stop()
         self.audio_player.play(track.url)
 
-        self.track_list.set_highlight(index)
+        self.track_list.set_playing_track(track.url)
         self.controls.set_playing(True)
 
     def _pause(self):
@@ -173,7 +178,9 @@ class MainWindow(ctk.CTk):
             self.queue_manager.unshuffle()
 
         self.track_list.load_tracks(self.queue_manager.queue)
-        self.track_list.set_highlight(self.queue_manager.current_index)
+
+        current = self.queue_manager.current()
+        self.track_list.set_playing_track(current.url if current else None)
         self.controls.set_shuffle_active(self.shuffle_enabled)
 
     def _on_playlist_removed(self, playlist_id):
@@ -208,8 +215,9 @@ class MainWindow(ctk.CTk):
             return
 
         self.audio_player.play(track.url)
-        if self.queue_manager.current_index is not None:
-            self.track_list.set_highlight(self.queue_manager.current_index)
+        
+        current = self.queue_manager.current()
+        self.track_list.set_playing_track(current.url if current else None)
 
         self.controls.set_playing(True)
 
