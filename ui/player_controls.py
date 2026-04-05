@@ -55,6 +55,10 @@ class PlayerControls(ctk.CTkFrame):
         now_playing_frame = ctk.CTkFrame(self, fg_color=CARD, corner_radius=14, border_width=1, border_color=STROKE, width=360)
         now_playing_frame.grid(row=0, column=0, padx=(14, 8), pady=10, sticky="nsew")
         now_playing_frame.grid_propagate(False)
+        self.grid_columnconfigure(1, weight=1)
+
+        now_playing_frame = ctk.CTkFrame(self, fg_color=CARD, corner_radius=14, border_width=1, border_color=STROKE)
+        now_playing_frame.grid(row=0, column=0, padx=(14, 8), pady=10, sticky="nsew")
 
         self.now_playing_title = ctk.CTkLabel(
             now_playing_frame,
@@ -63,6 +67,7 @@ class PlayerControls(ctk.CTkFrame):
             font=ctk.CTkFont(size=14, weight="bold"),
             anchor="w",
             width=320,
+            width=250,
         )
         self.now_playing_title.pack(anchor="w", padx=12, pady=(10, 2))
 
@@ -73,6 +78,7 @@ class PlayerControls(ctk.CTkFrame):
             font=ctk.CTkFont(size=12),
             anchor="w",
             width=320,
+            width=250,
         )
         self.now_playing_subtitle.pack(anchor="w", padx=12, pady=(0, 10))
 
@@ -117,6 +123,8 @@ class PlayerControls(ctk.CTkFrame):
 
         self.shuffle_btn = ctk.CTkButton(
             controls_group,
+        self.shuffle_btn = ctk.CTkButton(
+            controls_row,
             text="🔀",
             width=42,
             command=self.on_shuffle,
@@ -129,6 +137,7 @@ class PlayerControls(ctk.CTkFrame):
 
         self.prev_btn = ctk.CTkButton(
             controls_group,
+            controls_row,
             text="⏮",
             width=44,
             command=self.on_prev,
@@ -141,6 +150,7 @@ class PlayerControls(ctk.CTkFrame):
 
         self.play_pause_btn = ctk.CTkButton(
             controls_group,
+            controls_row,
             text="▶",
             width=56,
             command=self.on_play_pause,
@@ -152,6 +162,7 @@ class PlayerControls(ctk.CTkFrame):
 
         self.next_btn = ctk.CTkButton(
             controls_group,
+            controls_row,
             text="⏭",
             width=44,
             command=self.on_next,
@@ -164,6 +175,7 @@ class PlayerControls(ctk.CTkFrame):
 
         self.loop_btn = ctk.CTkButton(
             controls_group,
+            controls_row,
             text="🔁",
             width=42,
             command=self.on_loop,
@@ -183,6 +195,8 @@ class PlayerControls(ctk.CTkFrame):
         volume_frame = ctk.CTkFrame(self, fg_color=CARD, corner_radius=14, border_width=1, border_color=STROKE, width=280)
         volume_frame.grid(row=0, column=2, padx=(8, 14), pady=10, sticky="nsew")
         volume_frame.grid_propagate(False)
+        volume_frame = ctk.CTkFrame(self, fg_color=CARD, corner_radius=14, border_width=1, border_color=STROKE)
+        volume_frame.grid(row=0, column=2, padx=(8, 14), pady=10, sticky="nsew")
 
         volume_label = ctk.CTkLabel(volume_frame, text="Volume", text_color=TEXT_MUTED, font=ctk.CTkFont(size=11))
         volume_label.pack(anchor="w", padx=12, pady=(10, 4))
@@ -192,6 +206,7 @@ class PlayerControls(ctk.CTkFrame):
             from_=0,
             to=100,
             width=220,
+            width=160,
             number_of_steps=100,
             command=self.on_volume_change,
             progress_color=ACCENT,
