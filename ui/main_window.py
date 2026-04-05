@@ -133,6 +133,7 @@ class MainWindow(ctk.CTk):
 
         self.track_list.set_playing_track(track.url)
         self.controls.set_playing(True)
+        self.controls.set_track_info(track.title, track.artist)
 
     def _pause(self):
         self.audio_player.pause()
@@ -142,6 +143,7 @@ class MainWindow(ctk.CTk):
         self.audio_player.stop()
         self.controls.update_playback_progress(0.0, 0, 0)
         self.controls.set_playing(False)
+        self.controls.set_track_info(None, None)
 
     def _play_next(self):
         track = self.queue_manager.next()
@@ -220,6 +222,7 @@ class MainWindow(ctk.CTk):
         self.track_list.set_playing_track(current.url if current else None)
 
         self.controls.set_playing(True)
+        self.controls.set_track_info(current.title if current else None, current.artist if current else None)
 
     def _on_volume_change(self, value):
         self.audio_player.set_volume(int(value))
