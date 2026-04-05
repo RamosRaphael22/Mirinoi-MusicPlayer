@@ -41,13 +41,24 @@ class TrackList(ctk.CTkFrame):
         return s.lower().strip()
 
     def _build_ui(self):
+        self.header = ctk.CTkFrame(self, fg_color="transparent")
+        self.header.pack(fill="x", padx=10, pady=(10, 4))
+
         self.title = ctk.CTkLabel(
-            self,
+            self.header,
             text="Músicas",
             font=ctk.CTkFont(size=16, weight="bold"),
             text_color=TEXT
         )
-        self.title.pack(pady=(10, 6))
+        self.title.pack(anchor="w")
+
+        self.subtitle = ctk.CTkLabel(
+            self.header,
+            text="Dica: Ctrl+F para focar na pesquisa",
+            font=ctk.CTkFont(size=12),
+            text_color=TEXT_MUTED
+        )
+        self.subtitle.pack(anchor="w")
 
         self.search_row = ctk.CTkFrame(self, fg_color="transparent")
         self.search_row.pack(fill="x", padx=10, pady=(0, 8))
@@ -59,7 +70,9 @@ class TrackList(ctk.CTkFrame):
             text_color=TEXT,
             border_width=1,
             border_color=STROKE,
-            width=1000
+            width=1000,
+            height=34,
+            corner_radius=10
         )
         self.search_entry.pack(side="left", fill="x", expand=True)
         self.search_entry.bind("<FocusIn>", lambda e: self._clear_placeholder())
@@ -69,14 +82,15 @@ class TrackList(ctk.CTkFrame):
 
         self.clear_btn = ctk.CTkButton(
             self.search_row,
-            text="x",
+            text="✕",
             width=34,
-            height=30,
+            height=34,
             fg_color=SURFACE_3,
             hover_color=SURFACE_HOVER,
             text_color=TEXT_MUTED,
             border_width=1,
             border_color=STROKE,
+            corner_radius=10,
             command=self._clear_search
         )
         self.clear_btn.pack(side="left", padx=(6, 0), pady=(2, 0))
@@ -189,7 +203,9 @@ class TrackList(ctk.CTkFrame):
                 hover_color=SURFACE_HOVER,
                 text_color=TEXT,
                 border_width=1,
-                border_color=STROKE
+                border_color=STROKE,
+                height=38,
+                corner_radius=10
             )
 
             if self.default_fg_color is None:
@@ -247,6 +263,11 @@ class TrackList(ctk.CTkFrame):
         self._update_clear_button()
         self._apply_placeholder()
 
+    def focus_search(self):
+        self._clear_placeholder()
+        self.search_entry.focus_set()
+        self.search_entry.select_range(0, "end")
+        self.search_entry.icursor("end")
 
     def _update_clear_button(self):
         raw = self.search_var.get()

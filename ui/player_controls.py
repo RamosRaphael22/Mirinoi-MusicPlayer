@@ -15,7 +15,7 @@ class PlayerControls(ctk.CTkFrame):
         initial_volume=20,
         on_seek=None
     ):
-        super().__init__(parent, height=104)
+        super().__init__(parent, height=118)
 
         self.configure(fg_color=FOOTER)
 
@@ -61,6 +61,14 @@ class PlayerControls(ctk.CTkFrame):
         )
         self.now_playing_artist.pack(anchor="w", pady=(2, 0))
 
+        self.shortcut_hint = ctk.CTkLabel(
+            self.now_playing_frame,
+            text="Atalhos: Espaço = Play/Pause • Ctrl+F = Buscar",
+            text_color=TEXT_MUTED,
+            font=ctk.CTkFont(size=11)
+        )
+        self.shortcut_hint.pack(anchor="w", pady=(4, 0))
+
         self.center_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.center_frame.grid(row=0, column=1, sticky="nsew")
 
@@ -72,24 +80,28 @@ class PlayerControls(ctk.CTkFrame):
 
         self.prev_btn = ctk.CTkButton(self.buttons_row, text="⏮", command=self.on_prev,
                                     fg_color=BTN, hover_color=HOVER,
-                                    text_color=TEXT, border_width=1, border_color=STROKE)
+                                    text_color=TEXT, border_width=1, border_color=STROKE,
+                                    width=48, height=40, corner_radius=20)
 
         self.play_pause_btn = ctk.CTkButton(self.buttons_row, text="▶", command=self.on_play_pause,
                                             fg_color=ACCENT, hover_color=ACCENT_HOVER,
-                                            text_color="white")
+                                            text_color="white", width=56, height=42, corner_radius=21)
 
 
         self.next_btn = ctk.CTkButton(self.buttons_row, text="⏭", command=self.on_next,
                                     fg_color=BTN, hover_color=HOVER,
-                                    text_color=TEXT, border_width=1, border_color=STROKE)
+                                    text_color=TEXT, border_width=1, border_color=STROKE,
+                                    width=48, height=40, corner_radius=20)
 
         self.shuffle_btn = ctk.CTkButton(self.buttons_row, text="🔀", command=self.on_shuffle,
                                         fg_color=BTN, hover_color=HOVER,
-                                        text_color=TEXT, border_width=1, border_color=STROKE)
+                                        text_color=TEXT, border_width=1, border_color=STROKE,
+                                        width=48, height=40, corner_radius=20)
 
         self.loop_btn = ctk.CTkButton(self.buttons_row, text="🔁", command=self.on_loop,
                                     fg_color=BTN, hover_color=HOVER,
-                                    text_color=TEXT, border_width=1, border_color=STROKE)
+                                    text_color=TEXT, border_width=1, border_color=STROKE,
+                                    width=48, height=40, corner_radius=20)
 
         self.volume_section = ctk.CTkFrame(self, fg_color="transparent")
         self.volume_section.grid(row=0, column=2, sticky="e", padx=(8, 16), pady=10)
@@ -106,7 +118,8 @@ class PlayerControls(ctk.CTkFrame):
             to=1,
             width=560,
             number_of_steps=1000,
-            command=self._on_seek_slider_change
+            command=self._on_seek_slider_change,
+            button_corner_radius=10
         )
         self.playback_seek_slider.set(0)
 
