@@ -41,6 +41,7 @@ class MainWindow(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self._build_layout()
+        self._bind_shortcuts()
 
         self._playback_progress_update_job = None
         self._schedule_playback_progress_updates()
@@ -83,6 +84,27 @@ class MainWindow(ctk.CTk):
         )
 
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
+
+    def _bind_shortcuts(self):
+        self.bind_all("<space>", self._on_space_shortcut)
+        self.bind_all("<Control-f>", self._on_focus_search_shortcut)
+        self.bind_all("<Control-F>", self._on_focus_search_shortcut)
+
+    def _is_typing_context(self):
+        focused = self.focus_get()
+        if focused is None:
+            return False
+        return isinstance(focused, ctk.CTkEntry)
+
+    def _on_space_shortcut(self, _event):
+        if self._is_typing_context():
+            return None
+        self._on_play_pause()
+        return "break"
+
+    def _on_focus_search_shortcut(self, _event):
+        self.track_list.focus_search()
+        return "break"
 
     def _on_playlist_selected(self, playlist):
         self._stop_player()
@@ -191,6 +213,10 @@ class MainWindow(ctk.CTk):
         self.track_list.load_tracks([])
 
     def _on_close(self):
+        self.unbind_all("<space>")
+        self.unbind_all("<Control-f>")
+        self.unbind_all("<Control-F>")
+
         if self._playback_progress_update_job is not None:
             try:
                 self.after_cancel(self._playback_progress_update_job)
