@@ -2,19 +2,26 @@ import unicodedata
 import customtkinter as ctk
 from tkinter import messagebox
 from ui.playlist_modal import PlaylistModal
-from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, DANGER_HOVER, TEXT_MUTED, SURFACE_3
+from ui.theme import (
+    SURFACE,
+    SURFACE_2,
+    SURFACE_HOVER,
+    ACCENT,
+    ACCENT_HOVER,
+    TEXT,
+    STROKE,
+    DANGER_HOVER,
+    TEXT_MUTED,
+    SURFACE_3,
+    CARD,
+)
 
 
-# Sidebar UI component for managing playlists
-# Displays list of playlists from CSV service
-# Allows adding/removing playlists via modal dialog
-# Calls callback on playlist selection
-# Highlights selected playlist
 class PlaylistSidebar(ctk.CTkFrame):
     def __init__(self, parent, csv_service, on_select_callback=None, on_remove_callback=None):
-        super().__init__(parent, width=220)
+        super().__init__(parent, width=280, corner_radius=14)
 
-        self.configure(fg_color=SURFACE)
+        self.configure(fg_color=SURFACE, border_width=1, border_color=STROKE)
 
         self.csv_service = csv_service
         self.on_select_callback = on_select_callback
@@ -40,16 +47,27 @@ class PlaylistSidebar(ctk.CTkFrame):
         return s.lower().strip()
 
     def _build_ui(self):
+        header = ctk.CTkFrame(self, fg_color="transparent")
+        header.pack(fill="x", padx=12, pady=(12, 8))
+
         self.title = ctk.CTkLabel(
-            self,
-            text="Playlists",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=TEXT
+            header,
+            text="Suas playlists",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=TEXT,
         )
-        self.title.pack(pady=(10, 6))
+        self.title.pack(anchor="w")
+
+        self.count_label = ctk.CTkLabel(
+            header,
+            text="0 playlists",
+            text_color=TEXT_MUTED,
+            font=ctk.CTkFont(size=12),
+        )
+        self.count_label.pack(anchor="w", pady=(2, 0))
 
         self.search_row = ctk.CTkFrame(self, fg_color="transparent")
-        self.search_row.pack(fill="x", padx=10, pady=(0, 8))
+        self.search_row.pack(fill="x", padx=12, pady=(0, 8))
 
         self.search_entry = ctk.CTkEntry(
             self.search_row,
@@ -58,7 +76,9 @@ class PlaylistSidebar(ctk.CTkFrame):
             text_color=TEXT,
             border_width=1,
             border_color=STROKE,
-            width=170
+            width=185,
+            corner_radius=10,
+            height=34,
         )
         self.search_entry.pack(side="left", fill="x", expand=True)
 
@@ -69,47 +89,50 @@ class PlaylistSidebar(ctk.CTkFrame):
 
         self.clear_btn = ctk.CTkButton(
             self.search_row,
-            text="x",
+            text="×",
             width=34,
-            height=28,
+            height=34,
             fg_color=SURFACE_3,
             hover_color=SURFACE_HOVER,
             text_color=TEXT_MUTED,
             border_width=1,
             border_color=STROKE,
-            command=self._clear_search
+            command=self._clear_search,
         )
-        self.clear_btn.pack(side="left", padx=(6, 0), pady=(2, 0))
+        self.clear_btn.pack(side="left", padx=(6, 0))
 
         self.search_var.trace_add("write", lambda *_: (self._apply_playlist_filter(), self._update_clear_button()))
         self._update_clear_button()
 
         self.scroll = ctk.CTkScrollableFrame(self, height=400, fg_color="transparent")
-        self.scroll.pack(fill="both", expand=True, padx=10)
+        self.scroll.pack(fill="both", expand=True, padx=12)
+
+        actions = ctk.CTkFrame(self, fg_color="transparent")
+        actions.pack(fill="x", padx=12, pady=(8, 12))
 
         self.btn_add = ctk.CTkButton(
-            self,
-            text="➕ Adicionar",
+            actions,
+            text="+ Adicionar playlist",
             command=self._add_playlist_dialog,
-            fg_color=SURFACE_2,
-            hover_color=SURFACE_HOVER,
-            text_color=TEXT,
-            border_width=1,
-            border_color=STROKE
+            fg_color=ACCENT,
+            hover_color=ACCENT_HOVER,
+            text_color="white",
+            height=36,
         )
-        self.btn_add.pack(fill="x", padx=10, pady=(5, 2))
+        self.btn_add.pack(fill="x", pady=(0, 6))
 
         self.btn_remove = ctk.CTkButton(
-            self,
-            text="❌ Remover",
+            actions,
+            text="Remover selecionada",
             command=self._remove_selected_playlist,
             fg_color=SURFACE_2,
             hover_color=DANGER_HOVER,
             text_color=TEXT,
             border_width=1,
-            border_color=STROKE
+            border_color=STROKE,
+            height=34,
         )
-        self.btn_remove.pack(fill="x", padx=10, pady=(2, 10))
+        self.btn_remove.pack(fill="x")
 
     def _apply_placeholder(self):
         if self.search_var.get().strip():
@@ -133,6 +156,7 @@ class PlaylistSidebar(ctk.CTkFrame):
 
     def _load_playlists(self):
         self._all_playlists = self.csv_service.load_playlists()
+        self.count_label.configure(text=f"{len(self._all_playlists)} playlists")
         self._apply_playlist_filter()
 
     def _apply_playlist_filter(self):
@@ -155,6 +179,17 @@ class PlaylistSidebar(ctk.CTkFrame):
 
         self.playlist_buttons.clear()
 
+        if not playlists:
+            empty_box = ctk.CTkFrame(self.scroll, fg_color=CARD, border_width=1, border_color=STROKE, corner_radius=12)
+            empty_box.pack(fill="x", padx=6, pady=8)
+            ctk.CTkLabel(
+                empty_box,
+                text="Nenhuma playlist encontrada",
+                text_color=TEXT_MUTED,
+                font=ctk.CTkFont(size=13),
+            ).pack(padx=12, pady=14)
+            return
+
         for playlist in playlists:
             btn = ctk.CTkButton(
                 self.scroll,
@@ -165,9 +200,11 @@ class PlaylistSidebar(ctk.CTkFrame):
                 hover_color=SURFACE_HOVER,
                 text_color=TEXT,
                 border_width=1,
-                border_color=STROKE
+                border_color=STROKE,
+                height=34,
+                corner_radius=10,
             )
-            btn.pack(fill="x", pady=2, padx=5)
+            btn.pack(fill="x", pady=3, padx=4)
             self.playlist_buttons[playlist.id] = btn
 
         if self.selected_playlist_id and self.selected_playlist_id in self.playlist_buttons:
@@ -176,7 +213,7 @@ class PlaylistSidebar(ctk.CTkFrame):
                 fg_color=ACCENT,
                 hover_color=ACCENT_HOVER,
                 text_color="white",
-                border_width=0
+                border_width=0,
             )
 
     def _select_playlist(self, playlist):
@@ -188,7 +225,7 @@ class PlaylistSidebar(ctk.CTkFrame):
                     fg_color=ACCENT,
                     hover_color=ACCENT_HOVER,
                     text_color="white",
-                    border_width=0
+                    border_width=0,
                 )
             else:
                 btn.configure(
@@ -196,7 +233,7 @@ class PlaylistSidebar(ctk.CTkFrame):
                     hover_color=SURFACE_HOVER,
                     text_color=TEXT,
                     border_width=1,
-                    border_color=STROKE
+                    border_color=STROKE,
                 )
 
         if self.on_select_callback:
@@ -215,13 +252,13 @@ class PlaylistSidebar(ctk.CTkFrame):
         if not self.selected_playlist_id:
             messagebox.showwarning(
                 "Atenção",
-                "Selecione uma playlist para remover."
+                "Selecione uma playlist para remover.",
             )
             return
 
         confirm = messagebox.askyesno(
             "Remover Playlist",
-            "Tem certeza que deseja remover esta playlist?"
+            "Tem certeza que deseja remover esta playlist?",
         )
 
         if confirm:
@@ -236,12 +273,11 @@ class PlaylistSidebar(ctk.CTkFrame):
     def _clear_search(self):
         self.search_var.set("")
         self._clear_placeholder()
-        self._apply_playlist_filter() 
+        self._apply_playlist_filter()
         self._update_clear_button()
         self._apply_placeholder()
 
-
-    def _update_clear_button(self):    
+    def _update_clear_button(self):
         raw = self.search_var.get()
 
         if self._placeholder_active or not raw.strip() or raw == self._placeholder_text:

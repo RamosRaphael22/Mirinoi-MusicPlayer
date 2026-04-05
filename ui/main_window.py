@@ -41,6 +41,7 @@ class MainWindow(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self._build_layout()
+        self.controls.set_volume_display(int(self.audio_player.get_volume()))
 
         self._playback_progress_update_job = None
         self._schedule_playback_progress_updates()
@@ -52,6 +53,7 @@ class MainWindow(ctk.CTk):
             self.wm_state("zoomed")
 
     def _build_layout(self):
+        self.grid_columnconfigure(0, weight=0)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
 
@@ -62,13 +64,13 @@ class MainWindow(ctk.CTk):
             on_remove_callback=self._on_playlist_removed
         )
 
-        self.sidebar.grid(row=0, column=0, sticky="ns")
+        self.sidebar.grid(row=0, column=0, sticky="ns", padx=(12, 6), pady=(12, 6))
 
         self.track_list = TrackList(
             self,
             on_track_selected=self._on_track_selected
         )
-        self.track_list.grid(row=0, column=1, sticky="nsew")
+        self.track_list.grid(row=0, column=1, sticky="nsew", padx=(6, 12), pady=(12, 6))
 
         self.controls = PlayerControls(
             self,
@@ -123,8 +125,6 @@ class MainWindow(ctk.CTk):
 
     def _force_play_current(self):
         track = self.queue_manager.current()
-        index = self.queue_manager.current_index
-
         if not track:
             return
 
@@ -132,6 +132,7 @@ class MainWindow(ctk.CTk):
         self.audio_player.play(track.url)
 
         self.track_list.set_playing_track(track.url)
+        self.controls.set_track_info(track.title, track.artist)
         self.controls.set_playing(True)
 
     def _pause(self):
@@ -142,6 +143,7 @@ class MainWindow(ctk.CTk):
         self.audio_player.stop()
         self.controls.update_playback_progress(0.0, 0, 0)
         self.controls.set_playing(False)
+        self.controls.set_track_info(None, None)
 
     def _play_next(self):
         track = self.queue_manager.next()
@@ -215,14 +217,18 @@ class MainWindow(ctk.CTk):
             return
 
         self.audio_player.play(track.url)
-        
+
         current = self.queue_manager.current()
         self.track_list.set_playing_track(current.url if current else None)
+        if current:
+            self.controls.set_track_info(current.title, current.artist)
 
         self.controls.set_playing(True)
 
     def _on_volume_change(self, value):
-        self.audio_player.set_volume(int(value))
+        volume = int(value)
+        self.audio_player.set_volume(volume)
+        self.controls.set_volume_display(volume)
 
     def _schedule_playback_progress_updates(self):
         self._update_playback_progress_ui()

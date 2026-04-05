@@ -1,18 +1,24 @@
 import unicodedata
 import customtkinter as ctk
-from ui.theme import SURFACE, SURFACE_2, SURFACE_HOVER, ACCENT, ACCENT_HOVER, TEXT, STROKE, TEXT_MUTED, SURFACE_3
+from ui.theme import (
+    SURFACE,
+    SURFACE_2,
+    SURFACE_HOVER,
+    ACCENT,
+    ACCENT_HOVER,
+    TEXT,
+    STROKE,
+    TEXT_MUTED,
+    SURFACE_3,
+    CARD,
+)
 
 
-# UI component to display and manage the list of tracks
-# Allows track selection and highlights the selected track
-# Calls a callback when a track is selected
-# Provides method to load tracks into the list
-# Allows setting highlight on a specific track
 class TrackList(ctk.CTkFrame):
     def __init__(self, parent, on_track_selected=None):
-        super().__init__(parent)
+        super().__init__(parent, corner_radius=14)
 
-        self.configure(fg_color=SURFACE)
+        self.configure(fg_color=SURFACE, border_width=1, border_color=STROKE)
 
         self.on_track_selected = on_track_selected
 
@@ -27,7 +33,7 @@ class TrackList(ctk.CTkFrame):
 
         self.search_var = ctk.StringVar()
 
-        self._placeholder_text = "Pesquisar músicas..."
+        self._placeholder_text = "Buscar faixa ou artista..."
         self._placeholder_active = False
 
         self._playing_track_url = None
@@ -41,16 +47,27 @@ class TrackList(ctk.CTkFrame):
         return s.lower().strip()
 
     def _build_ui(self):
+        header = ctk.CTkFrame(self, fg_color="transparent")
+        header.pack(fill="x", padx=14, pady=(12, 6))
+
         self.title = ctk.CTkLabel(
-            self,
-            text="Músicas",
-            font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=TEXT
+            header,
+            text="Biblioteca da playlist",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=TEXT,
         )
-        self.title.pack(pady=(10, 6))
+        self.title.pack(anchor="w")
+
+        self.subtitle = ctk.CTkLabel(
+            header,
+            text="Selecione uma faixa para reproduzir",
+            font=ctk.CTkFont(size=12),
+            text_color=TEXT_MUTED,
+        )
+        self.subtitle.pack(anchor="w", pady=(2, 0))
 
         self.search_row = ctk.CTkFrame(self, fg_color="transparent")
-        self.search_row.pack(fill="x", padx=10, pady=(0, 8))
+        self.search_row.pack(fill="x", padx=14, pady=(0, 8))
 
         self.search_entry = ctk.CTkEntry(
             self.search_row,
@@ -59,7 +76,8 @@ class TrackList(ctk.CTkFrame):
             text_color=TEXT,
             border_width=1,
             border_color=STROKE,
-            width=1000
+            corner_radius=10,
+            height=36,
         )
         self.search_entry.pack(side="left", fill="x", expand=True)
         self.search_entry.bind("<FocusIn>", lambda e: self._clear_placeholder())
@@ -69,23 +87,23 @@ class TrackList(ctk.CTkFrame):
 
         self.clear_btn = ctk.CTkButton(
             self.search_row,
-            text="x",
+            text="×",
             width=34,
-            height=30,
+            height=34,
             fg_color=SURFACE_3,
             hover_color=SURFACE_HOVER,
             text_color=TEXT_MUTED,
             border_width=1,
             border_color=STROKE,
-            command=self._clear_search
+            command=self._clear_search,
         )
-        self.clear_btn.pack(side="left", padx=(6, 0), pady=(2, 0))
+        self.clear_btn.pack(side="left", padx=(6, 0))
 
         self.search_var.trace_add("write", lambda *_: (self._apply_track_filter(), self._update_clear_button()))
         self._update_clear_button()
 
         self.scroll = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        self.scroll.pack(fill="both", expand=True, padx=10, pady=5)
+        self.scroll.pack(fill="both", expand=True, padx=14, pady=(0, 10))
 
     def _apply_placeholder(self):
         if self.search_var.get().strip():
@@ -113,7 +131,7 @@ class TrackList(ctk.CTkFrame):
         self.selected_index = None
         self.highlighted_index = None
 
-        self.search_var.set("")  
+        self.search_var.set("")
 
         for widget in self.scroll.winfo_children():
             widget.destroy()
@@ -121,17 +139,21 @@ class TrackList(ctk.CTkFrame):
         self.track_buttons.clear()
         self.default_fg_color = None
 
+        loading_box = ctk.CTkFrame(self.scroll, fg_color=CARD, border_width=1, border_color=STROKE, corner_radius=12)
+        loading_box.pack(fill="x", padx=4, pady=12)
+
         label = ctk.CTkLabel(
-            self.scroll,
-            text="Carregando músicas...",
+            loading_box,
+            text="Carregando músicas da playlist...",
             font=ctk.CTkFont(size=14, weight="bold"),
-            text_color=TEXT_MUTED
+            text_color=TEXT_MUTED,
         )
-        label.pack(pady=20)
+        label.pack(pady=18)
 
     def load_tracks(self, tracks):
         self._all_tracks = tracks or []
-        self.search_var.set("")  
+        self.subtitle.configure(text=f"{len(self._all_tracks)} faixa(s) disponível(is)")
+        self.search_var.set("")
         self._apply_track_filter()
 
     def _apply_track_filter(self):
@@ -164,21 +186,20 @@ class TrackList(ctk.CTkFrame):
         self.default_fg_color = None
 
         if not tracks:
+            empty_box = ctk.CTkFrame(self.scroll, fg_color=CARD, border_width=1, border_color=STROKE, corner_radius=12)
+            empty_box.pack(fill="x", padx=4, pady=12)
             label = ctk.CTkLabel(
-                self.scroll,
+                empty_box,
                 text="Nenhuma música encontrada.",
                 font=ctk.CTkFont(size=14, weight="bold"),
-                text_color=TEXT_MUTED
+                text_color=TEXT_MUTED,
             )
-            label.pack(pady=20)
+            label.pack(pady=18)
             return
 
         for index, track in enumerate(tracks):
-            text = (
-                f"{index + 1}. {track.title} - {track.artist}"
-                if track.artist
-                else f"{index + 1}. {track.title}"
-            )
+            artist = track.artist if track.artist else "Artista desconhecido"
+            text = f"{index + 1:02d}. {track.title}  •  {artist}"
 
             btn = ctk.CTkButton(
                 self.scroll,
@@ -189,13 +210,15 @@ class TrackList(ctk.CTkFrame):
                 hover_color=SURFACE_HOVER,
                 text_color=TEXT,
                 border_width=1,
-                border_color=STROKE
+                border_color=STROKE,
+                height=38,
+                corner_radius=10,
             )
 
             if self.default_fg_color is None:
                 self.default_fg_color = btn.cget("fg_color")
 
-            btn.pack(fill="x", pady=2)
+            btn.pack(fill="x", pady=3, padx=4)
             self.track_buttons.append(btn)
         self._apply_playing_highlight()
 
@@ -225,7 +248,7 @@ class TrackList(ctk.CTkFrame):
                     fg_color=ACCENT,
                     hover_color=ACCENT_HOVER,
                     text_color=TEXT,
-                    border_width=0
+                    border_width=0,
                 )
             else:
                 btn.configure(
@@ -233,7 +256,7 @@ class TrackList(ctk.CTkFrame):
                     hover_color=SURFACE_HOVER,
                     text_color=TEXT,
                     border_width=1,
-                    border_color=STROKE
+                    border_color=STROKE,
                 )
 
     def set_playing_track(self, track_url: str | None):
@@ -243,10 +266,9 @@ class TrackList(ctk.CTkFrame):
     def _clear_search(self):
         self.search_var.set("")
         self._clear_placeholder()
-        self._apply_track_filter() 
+        self._apply_track_filter()
         self._update_clear_button()
         self._apply_placeholder()
-
 
     def _update_clear_button(self):
         raw = self.search_var.get()
