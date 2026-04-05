@@ -52,14 +52,6 @@ class TrackList(ctk.CTkFrame):
         )
         self.title.pack(anchor="w")
 
-        self.subtitle = ctk.CTkLabel(
-            self.header,
-            text="Use Ctrl+F para buscar • ↑/↓ para navegar • Enter para tocar",
-            font=ctk.CTkFont(size=12),
-            text_color=TEXT_MUTED
-        )
-        self.subtitle.pack(anchor="w")
-
         self.details = ctk.CTkLabel(
             self.header,
             text="0 música(s) listada(s)",
