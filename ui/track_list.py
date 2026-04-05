@@ -54,11 +54,19 @@ class TrackList(ctk.CTkFrame):
 
         self.subtitle = ctk.CTkLabel(
             self.header,
-            text="Dica: Ctrl+F para focar na pesquisa",
+            text="Use Ctrl+F para buscar • ↑/↓ para navegar • Enter para tocar",
             font=ctk.CTkFont(size=12),
             text_color=TEXT_MUTED
         )
         self.subtitle.pack(anchor="w")
+
+        self.details = ctk.CTkLabel(
+            self.header,
+            text="0 música(s) listada(s)",
+            font=ctk.CTkFont(size=11),
+            text_color=TEXT_MUTED
+        )
+        self.details.pack(anchor="w", pady=(2, 0))
 
         self.search_row = ctk.CTkFrame(self, fg_color="transparent")
         self.search_row.pack(fill="x", padx=10, pady=(0, 8))
@@ -170,6 +178,7 @@ class TrackList(ctk.CTkFrame):
         self.tracks = tracks
         self.selected_index = None
         self.highlighted_index = None
+        self.details.configure(text=f"{len(tracks)} música(s) listada(s)")
 
         for widget in self.scroll.winfo_children():
             widget.destroy()
@@ -259,9 +268,30 @@ class TrackList(ctk.CTkFrame):
     def _clear_search(self):
         self.search_var.set("")
         self._clear_placeholder()
-        self._apply_track_filter() 
+        self._apply_track_filter()
         self._update_clear_button()
         self._apply_placeholder()
+
+    def has_tracks(self) -> bool:
+        return len(self.tracks) > 0
+
+    def move_selection(self, direction: int):
+        if not self.tracks:
+            return
+
+        if self.selected_index is None:
+            next_index = 0 if direction >= 0 else len(self.tracks) - 1
+        else:
+            next_index = max(0, min(len(self.tracks) - 1, self.selected_index + direction))
+
+        self.set_highlight(next_index)
+
+    def play_selected(self):
+        if self.selected_index is None or not self.tracks:
+            return
+
+        if self.on_track_selected:
+            self.on_track_selected(self.tracks[self.selected_index])
 
     def focus_search(self):
         self._clear_placeholder()

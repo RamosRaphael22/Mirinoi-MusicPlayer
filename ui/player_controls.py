@@ -61,14 +61,6 @@ class PlayerControls(ctk.CTkFrame):
         )
         self.now_playing_artist.pack(anchor="w", pady=(2, 0))
 
-        self.shortcut_hint = ctk.CTkLabel(
-            self.now_playing_frame,
-            text="Atalhos: Espaço = Play/Pause • Ctrl+F = Buscar",
-            text_color=TEXT_MUTED,
-            font=ctk.CTkFont(size=11)
-        )
-        self.shortcut_hint.pack(anchor="w", pady=(4, 0))
-
         self.center_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.center_frame.grid(row=0, column=1, sticky="nsew")
 

@@ -89,6 +89,9 @@ class MainWindow(ctk.CTk):
         self.bind_all("<space>", self._on_space_shortcut)
         self.bind_all("<Control-f>", self._on_focus_search_shortcut)
         self.bind_all("<Control-F>", self._on_focus_search_shortcut)
+        self.bind_all("<Up>", self._on_select_previous_track_shortcut)
+        self.bind_all("<Down>", self._on_select_next_track_shortcut)
+        self.bind_all("<Return>", self._on_play_selected_track_shortcut)
 
     def _is_typing_context(self):
         focused = self.focus_get()
@@ -104,6 +107,24 @@ class MainWindow(ctk.CTk):
 
     def _on_focus_search_shortcut(self, _event):
         self.track_list.focus_search()
+        return "break"
+
+    def _on_select_previous_track_shortcut(self, _event):
+        if self._is_typing_context():
+            return None
+        self.track_list.move_selection(-1)
+        return "break"
+
+    def _on_select_next_track_shortcut(self, _event):
+        if self._is_typing_context():
+            return None
+        self.track_list.move_selection(1)
+        return "break"
+
+    def _on_play_selected_track_shortcut(self, _event):
+        if self._is_typing_context():
+            return None
+        self.track_list.play_selected()
         return "break"
 
     def _on_playlist_selected(self, playlist):
@@ -216,6 +237,9 @@ class MainWindow(ctk.CTk):
         self.unbind_all("<space>")
         self.unbind_all("<Control-f>")
         self.unbind_all("<Control-F>")
+        self.unbind_all("<Up>")
+        self.unbind_all("<Down>")
+        self.unbind_all("<Return>")
 
         if self._playback_progress_update_job is not None:
             try:
