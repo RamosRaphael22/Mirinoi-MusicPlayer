@@ -1,9 +1,9 @@
 import threading
-import subprocess
 import time
 from enum import Enum
 import vlc
 from yt_dlp import YoutubeDL
+from typing import Dict, Tuple
 
 class PlayerState(Enum):
     STOPPED = "stopped"
@@ -95,9 +95,9 @@ class AudioPlayer:
         finished_naturally = False
 
         try:
-            audio_url = self._get_audio_stream_url(self.current_url)
+            audio_url, http_headers = self._get_audio_stream_data(self.current_url)
 
-            media = self.instance.media_new(audio_url)
+            media = self._build_media(audio_url, http_headers)
             self.player.set_media(media)
             self.player.play()
 
@@ -115,10 +115,24 @@ class AudioPlayer:
 
             state = self.player.get_state()
             if state not in (vlc.State.Playing, vlc.State.Paused):
-                with self._lock:
-                    if play_id == self._play_id:
-                        self.state = PlayerState.STOPPED
-                return
+                audio_url, http_headers = self._get_audio_stream_data(self.current_url)
+                media = self._build_media(audio_url, http_headers)
+                self.player.set_media(media)
+                self.player.play()
+
+                timeout = time.time() + 5
+                while time.time() < timeout:
+                    retry_state = self.player.get_state()
+                    if retry_state in (vlc.State.Playing, vlc.State.Paused):
+                        break
+                    time.sleep(0.1)
+
+                retry_state = self.player.get_state()
+                if retry_state not in (vlc.State.Playing, vlc.State.Paused):
+                    with self._lock:
+                        if play_id == self._play_id:
+                            self.state = PlayerState.STOPPED
+                    return
 
             if resume_time_ms > 0:
                 try:
@@ -191,21 +205,45 @@ class AudioPlayer:
             self._paused_time_ms = 0
             self._last_known_track_duration_ms = 0
 
-    def _get_audio_stream_url(self, video_url: str) -> str:
+    def _build_media(self, stream_url: str, http_headers: Dict[str, str]):
+        media = self.instance.media_new(stream_url)
+        for key, value in (http_headers or {}).items():
+            if not key or value is None:
+                continue
+
+            lowered = key.lower()
+            text_value = str(value)
+
+            if lowered == "user-agent":
+                media.add_option(f":http-user-agent={text_value}")
+            elif lowered == "referer":
+                media.add_option(f":http-referrer={text_value}")
+            else:
+                media.add_option(f":http-header={key}: {text_value}")
+
+        return media
+
+    def _get_audio_stream_data(self, video_url: str) -> Tuple[str, Dict[str, str]]:
         ydl_opts = {
             "format": "bestaudio/best",
             "quiet": True,
             "no_warnings": True,
             "noplaylist": True,
             "skip_download": True,
+            "extractor_args": {
+                "youtube": {
+                    "player_client": ["web"]
+                }
+            },
         }
 
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
 
         direct = info.get("url")
+        headers = info.get("http_headers") if isinstance(info.get("http_headers"), dict) else {}
         if isinstance(direct, str) and direct.strip():
-            return direct.strip()
+            return direct.strip(), headers
 
         formats = info.get("formats") or []
         if not formats:
@@ -218,7 +256,9 @@ class AudioPlayer:
         if not u:
             raise RuntimeError("yt_dlp: could not extract stream url")
 
-        return str(u).strip()
+        format_headers = best.get("http_headers") if isinstance(best.get("http_headers"), dict) else {}
+        selected_headers = format_headers or headers
+        return str(u).strip(), selected_headers
 
     def set_volume(self, volume: int):
         v = max(0, min(100, int(volume)))
