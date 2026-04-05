@@ -113,7 +113,7 @@ class TrackList(ctk.CTkFrame):
         self.selected_index = None
         self.highlighted_index = None
 
-        self.search_var.set("")  
+        self.search_var.set("")
 
         for widget in self.scroll.winfo_children():
             widget.destroy()
@@ -131,8 +131,31 @@ class TrackList(ctk.CTkFrame):
 
     def load_tracks(self, tracks):
         self._all_tracks = tracks or []
-        self.search_var.set("")  
+        self.search_var.set("")
         self._apply_track_filter()
+
+    def focus_search(self):
+        self.search_entry.focus_set()
+        self._clear_placeholder()
+
+    def select_relative(self, step: int):
+        if not self.tracks:
+            return
+
+        if self.selected_index is None:
+            target_index = 0 if step >= 0 else len(self.tracks) - 1
+        else:
+            target_index = max(0, min(len(self.tracks) - 1, self.selected_index + step))
+
+        self.selected_index = target_index
+        self.set_highlight(target_index)
+
+    def play_selected(self):
+        if self.selected_index is None or not self.tracks:
+            return
+
+        if self.on_track_selected:
+            self.on_track_selected(self.tracks[self.selected_index])
 
     def _apply_track_filter(self):
         raw = self.search_var.get()
@@ -243,10 +266,9 @@ class TrackList(ctk.CTkFrame):
     def _clear_search(self):
         self.search_var.set("")
         self._clear_placeholder()
-        self._apply_track_filter() 
+        self._apply_track_filter()
         self._update_clear_button()
         self._apply_placeholder()
-
 
     def _update_clear_button(self):
         raw = self.search_var.get()

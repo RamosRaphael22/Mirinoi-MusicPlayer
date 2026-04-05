@@ -35,6 +35,7 @@ class PlayerControls(ctk.CTkFrame):
         self._build_ui()
 
         self.volume_slider.set(self.initial_volume)
+        self.set_status("Selecione uma playlist para começar.")
 
     def _build_ui(self):
         self.prev_btn = ctk.CTkButton(self, text="⏮", command=self.on_prev,
@@ -78,6 +79,8 @@ class PlayerControls(ctk.CTkFrame):
 
         self.playback_time_label = ctk.CTkLabel(self, text="0:00 / 0:00", text_color=TEXT_MUTED)
 
+        self.status_label = ctk.CTkLabel(self, text="", text_color=TEXT_MUTED, anchor="w")
+
         self.prev_btn.pack(side="left", padx=5, pady=10)
         self.play_pause_btn.pack(side="left", padx=5, pady=10)
         self.next_btn.pack(side="left", padx=5, pady=10)
@@ -86,6 +89,7 @@ class PlayerControls(ctk.CTkFrame):
         self.playback_seek_slider.pack(side="left", padx=(10, 5))
         self.playback_time_label.pack(side="left", padx=(8, 15))
         self.volume_slider.pack(side="left", padx=(10, 15))
+        self.status_label.pack(side="left", padx=(4, 10), fill="x", expand=True)
 
     def set_playing(self, is_playing: bool):
         self.play_pause_btn.configure(text="⏸" if is_playing else "▶")
@@ -106,6 +110,10 @@ class PlayerControls(ctk.CTkFrame):
                 border_width=1,
                 border_color=STROKE
             )
+
+
+    def set_status(self, message: str):
+        self.status_label.configure(text=message or "")
 
     def set_loop_active(self, active: bool):
         if active:

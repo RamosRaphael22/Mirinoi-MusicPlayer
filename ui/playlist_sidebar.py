@@ -131,6 +131,10 @@ class PlaylistSidebar(ctk.CTkFrame):
         self.search_entry.delete(0, "end")
         self.search_entry.configure(text_color=TEXT)
 
+    def focus_search(self):
+        self.search_entry.focus_set()
+        self._clear_placeholder()
+
     def _load_playlists(self):
         self._all_playlists = self.csv_service.load_playlists()
         self._apply_playlist_filter()

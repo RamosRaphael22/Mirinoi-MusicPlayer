@@ -11,6 +11,7 @@ from ui.track_list import TrackList
 from ui.player_controls import PlayerControls
 from ui.theme import BG
 
+
 # Main application window
 # Integrates playlist sidebar, track list, and player controls
 # Manages state of audio player and track queue
@@ -41,6 +42,7 @@ class MainWindow(ctk.CTk):
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self._build_layout()
+        self._bind_keyboard_shortcuts()
 
         self._playback_progress_update_job = None
         self._schedule_playback_progress_updates()
@@ -84,8 +86,61 @@ class MainWindow(ctk.CTk):
 
         self.controls.grid(row=1, column=0, columnspan=2, sticky="ew")
 
+    def _bind_keyboard_shortcuts(self):
+        self.bind("<space>", self._shortcut_play_pause)
+        self.bind("<Control-f>", self._shortcut_focus_track_search)
+        self.bind("<Control-F>", self._shortcut_focus_track_search)
+        self.bind("<Control-l>", self._shortcut_focus_playlist_search)
+        self.bind("<Control-L>", self._shortcut_focus_playlist_search)
+        self.bind("<Up>", self._shortcut_select_prev_track)
+        self.bind("<Down>", self._shortcut_select_next_track)
+        self.bind("<Return>", self._shortcut_play_selected_track)
+        self.bind("<Control-Right>", self._shortcut_next_track)
+        self.bind("<Control-Left>", self._shortcut_prev_track)
+
+    def _shortcut_play_pause(self, event):
+        if isinstance(self.focus_get(), ctk.CTkEntry):
+            return
+        self._on_play_pause()
+        return "break"
+
+    def _shortcut_focus_track_search(self, _event):
+        self.track_list.focus_search()
+        return "break"
+
+    def _shortcut_focus_playlist_search(self, _event):
+        self.sidebar.focus_search()
+        return "break"
+
+    def _shortcut_select_prev_track(self, event):
+        if isinstance(self.focus_get(), ctk.CTkEntry):
+            return
+        self.track_list.select_relative(-1)
+        return "break"
+
+    def _shortcut_select_next_track(self, event):
+        if isinstance(self.focus_get(), ctk.CTkEntry):
+            return
+        self.track_list.select_relative(1)
+        return "break"
+
+    def _shortcut_play_selected_track(self, event):
+        if isinstance(self.focus_get(), ctk.CTkEntry):
+            return
+        self.track_list.play_selected()
+        return "break"
+
+    def _shortcut_next_track(self, _event):
+        self._play_next()
+        return "break"
+
+    def _shortcut_prev_track(self, _event):
+        self._play_prev()
+        return "break"
+
     def _on_playlist_selected(self, playlist):
         self._stop_player()
+        self.controls.set_status(f"Carregando playlist: {playlist.name}")
 
         self.track_list.show_loading()
         self.queue_manager.set_queue([])
@@ -104,6 +159,12 @@ class MainWindow(ctk.CTk):
         self.queue_manager.set_queue(tracks)
         self.track_list.load_tracks(tracks)
 
+        total_tracks = len(tracks)
+        if total_tracks:
+            self.controls.set_status(f"{total_tracks} músicas carregadas. Use ↑/↓ e Enter para navegar.")
+        else:
+            self.controls.set_status("Nenhuma música encontrada nesta playlist.")
+
     def _on_track_selected(self, track):
         try:
             idx = next(i for i, t in enumerate(self.queue_manager.queue) if t.url == track.url)
@@ -120,6 +181,7 @@ class MainWindow(ctk.CTk):
 
         self.audio_player.play(track.url)
         self.controls.set_playing(self.audio_player.state == PlayerState.PLAYING)
+        self._set_now_playing_status(track)
 
     def _force_play_current(self):
         track = self.queue_manager.current()
@@ -133,6 +195,17 @@ class MainWindow(ctk.CTk):
 
         self.track_list.set_playing_track(track.url)
         self.controls.set_playing(True)
+        self._set_now_playing_status(track, index)
+
+    def _set_now_playing_status(self, track, index: int | None = None):
+        if index is None:
+            index = self.queue_manager.current_index
+
+        total = len(self.queue_manager.queue)
+        position = index + 1 if index is not None and index >= 0 else "?"
+
+        artist_suffix = f" - {track.artist}" if track.artist else ""
+        self.controls.set_status(f"Tocando {position}/{total}: {track.title}{artist_suffix}")
 
     def _pause(self):
         self.audio_player.pause()
@@ -187,6 +260,7 @@ class MainWindow(ctk.CTk):
         self._stop_player()
         self.queue_manager.set_queue([])
         self.track_list.load_tracks([])
+        self.controls.set_status("Playlist removida. Selecione outra para continuar.")
 
     def _on_close(self):
         if self._playback_progress_update_job is not None:
@@ -208,6 +282,7 @@ class MainWindow(ctk.CTk):
         if state == PlayerState.PLAYING:
             self.audio_player.pause()
             self.controls.set_playing(False)
+            self.controls.set_status("Pausado")
             return
 
         track = self.queue_manager.current()
@@ -215,11 +290,12 @@ class MainWindow(ctk.CTk):
             return
 
         self.audio_player.play(track.url)
-        
+
         current = self.queue_manager.current()
         self.track_list.set_playing_track(current.url if current else None)
 
         self.controls.set_playing(True)
+        self._set_now_playing_status(track)
 
     def _on_volume_change(self, value):
         self.audio_player.set_volume(int(value))
